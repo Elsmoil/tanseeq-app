@@ -12,6 +12,14 @@ const gulfCountries = {
   "عمان": ["مسقط", "ظفار", "مسندم", "البريمي", "الداخلية", "شمال الباطنة", "جنوب الباطنة"]
 };
 
+const getDialCode = (countryName: string) => {
+  const codes: Record<string, string> = { 
+    "السعودية": "+966", "الإمارات": "+971", "الكويت": "+965", 
+    "قطر": "+974", "البحرين": "+973", "عمان": "+968" 
+  };
+  return codes[countryName] || "+966";
+};
+
 export default function Home() {
   const [formType, setFormType] = useState<"men" | "women" | null>(null);
   const [loading, setLoading] = useState(false);
@@ -181,20 +189,17 @@ export default function Home() {
                       <select required value={selectedCountry} onChange={handleCountryChange} className="w-full border border-slate-200 rounded-xl p-3 bg-white outline-none focus:ring-2 focus:ring-yellow-500 transition">
                         <option value="">اختر الدولة...</option>
                         {Object.keys(gulfCountries).map((country) => (
-                          <option key={country} value={country}>{country}</option>
+                         <option 
+                            key={country} 
+                            value={country} 
+                            disabled={country !== "السعودية"} 
+                            className={country !== "السعودية" ? "text-slate-400" : "text-slate-900"}
+                          >
+                            {country} {country !== "السعودية" ? "(قريباً)" : ""}
+                          </option>
                         ))}
                       </select>
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-slate-700">المنطقة / المدينة</label>
-                      <select name="region" required disabled={!selectedCountry} className="w-full border border-slate-200 rounded-xl p-3 bg-white outline-none focus:ring-2 focus:ring-yellow-500 transition disabled:opacity-50">
-                        <option value="">{selectedCountry ? "اختر المنطقة..." : "اختر الدولة أولاً"}</option>
-                        {regions.map((region) => (
-                          <option key={region} value={region}>{region}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                    </div>                  </div>
                 </div>
               </div>
 
@@ -340,10 +345,23 @@ export default function Home() {
                 <div className="relative z-10">
                   <h3 className="text-xl font-bold mb-4 text-yellow-500">التواصل والخصوصية التامة</h3>
                   <div className="mb-6">
-                    <label className="block mb-2 text-sm font-medium text-slate-300">رقم الواتساب للتواصل (مع الرمز الدولي)</label>
-                    <input type="tel" name="whatsapp_number" dir="ltr" placeholder="+966 5X XXX XXXX" required className="w-full md:w-1/2 border-none rounded-xl p-4 bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-yellow-500 transition" />
-                  </div>
-                  <div className="flex items-start gap-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                    <label className="block mb-2 text-sm font-medium text-slate-300">رقم الواتساب للتواصل</label>
+                    <div className="flex w-full md:w-1/2" dir="ltr">
+                      <span className="inline-flex items-center px-4 rounded-l-xl bg-slate-700 text-white font-bold border-r border-slate-600">
+                        {selectedCountry ? getDialCode(selectedCountry) : "+966"}
+                      </span>
+                      <input 
+                        type="tel" 
+                        name="whatsapp_number" 
+                        pattern={selectedCountry === "السعودية" ? "^5[0-9]{8}$" : "[0-9]{7,10}"} 
+                        title={selectedCountry === "السعودية" ? "يجب أن يبدأ الرقم بـ 5 ويتكون من 9 أرقام" : "أدخل رقم هاتف صحيح"}
+                        placeholder={selectedCountry === "السعودية" ? "5X XXX XXXX" : "أدخل الرقم..."}
+                        required 
+                        disabled={!selectedCountry}
+                        className="flex-1 w-full border-none rounded-r-xl p-4 bg-slate-800 text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-yellow-500 transition disabled:opacity-50" 
+                      />
+                    </div>
+                  </div>                  <div className="flex items-start gap-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
                     <Lock className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
                     <p className="text-sm text-slate-300 leading-relaxed">
                       <strong className="text-white block mb-1">خصوصيتك أمانة</strong>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "منصة تنسيق | للزواج الجاد",
   description: "منصة التوافق والزواج الجاد داخل الخليج بسرية واحترافية",
   manifest: "/manifest.json",
+};
+
+export const viewport: viewport = {
   themeColor: "#0f172a",
 };
 

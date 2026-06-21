@@ -144,27 +144,25 @@ const initialFormState = {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fbf9f8] p-4" dir="rtl">
-        <div className="bg-white p-10 rounded-[2rem] shadow-xl border border-[#e4e2e2] text-center max-w-md w-full">
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] p-4" dir="rtl">
+        <div className="bg-white p-10 rounded-[2rem] shadow-xl border border-slate-200 text-center max-w-md w-full">
           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-[#051b12] mb-2">تم استلام طلبك بنجاح</h2>
-          <div className="bg-[#fbf9f8] border border-[#e4e2e2] rounded-xl p-4 my-6">
-            <p className="text-sm text-[#424844] mb-1">رقم الطلب:</p>
+          <h2 className="text-2xl font-bold text-[#0f172a] mb-2">تم استلام طلبك بنجاح</h2>
+          <div className="bg-[#f8fafc] border border-slate-200 rounded-xl p-4 my-6">
+            <p className="text-sm text-slate-500 mb-1">رقم الملف:</p>
             <p className="text-2xl font-bold text-[#c29b57]" dir="ltr">{submittedId}</p>
           </div>
-          <p className="text-[#424844] mb-8 leading-relaxed text-sm">
-            سيتم مراجعة الطلب من الإدارة قبل الاعتماد والتواصل معك عند الحاجة.
+          <p className="text-slate-600 mb-6 leading-relaxed text-sm font-medium">
+            يرجى الاحتفاظ برقم الملف لمتابعة التحديثات مستقبلاً. سيتم مراجعة الطلب من الإدارة، وسنتواصل معك عند الحاجة عبر وسيلة التواصل الرسمية المعتمدة.
           </p>
-         <div className="flex flex-col gap-3 mt-6">
-            <button 
-              onClick={() => { navigator.clipboard.writeText(submittedId); alert("تم النسخ!"); }} 
-              className="w-full bg-[#c29b57] text-white px-8 py-4 rounded-xl hover:bg-[#a8864a] transition font-bold"
-            >
-               نسخ رقم الطلب
-            </button>
-            <Link href="/" className="w-full bg-[#051b12] text-white px-8 py-4 rounded-xl hover:bg-[#1a3026] transition font-bold block text-center">
+          <div className="flex flex-col gap-3 mt-6">
+            {/* وسيلة التواصل المعتمدة */}
+            <a href="https://wa.me/966527585083" target="_blank" rel="noopener noreferrer" className="w-full bg-green-500 text-white px-8 py-4 rounded-xl hover:bg-green-600 transition font-bold flex items-center justify-center gap-2">
+              <Phone size={18} /> تواصل مع الدعم
+            </a>
+            <Link href="/" className="w-full bg-[#0f172a] text-white px-8 py-4 rounded-xl hover:bg-[#1e293b] transition font-bold block text-center">
                العودة للرئيسية
             </Link>
           </div>
@@ -172,35 +170,34 @@ const initialFormState = {
       </div>
     );
   }
-
   return (
-    <main className="min-h-screen bg-[#fbf9f8] font-sans flex flex-col items-center py-10 px-4" dir="rtl">
+    <main className="min-h-screen bg-[#f8fafc] font-sans flex flex-col items-center py-10 px-4" dir="rtl">
       
       {!formType ? (
         // شاشة اختيار نوع التسجيل (في حال الدخول للرابط مباشرة)
         <div className="max-w-4xl w-full text-center mt-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#051b12] mb-10">الرجاء اختيار نوع التسجيل للبدء</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#0f172a] mb-10">الرجاء اختيار نوع التسجيل للبدء</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-            <button onClick={() => setFormType("women")} className="bg-white rounded-[2rem] p-8 border border-[#e4e2e2] shadow-sm hover:shadow-xl transition-all flex flex-col items-center group">
+            <button onClick={() => setFormType("women")} className="bg-white rounded-[2rem] p-8 border border-[#e2e8f0] shadow-sm hover:shadow-xl transition-all flex flex-col items-center group">
               <div className="w-28 h-28 bg-[#c29b57] rounded-full flex items-center justify-center mb-8"><span className="material-symbols-outlined text-white text-5xl">face_3</span></div>
-              <h3 className="text-2xl font-bold text-[#051b12] mb-2">تسجيل النساء</h3>
-              <div className="bg-[#051b12] text-white w-full py-4 rounded-xl font-bold mt-4">ابدأ الآن</div>
+              <h3 className="text-2xl font-bold text-[#0f172a] mb-2">تسجيل النساء</h3>
+              <div className="bg-[#0f172a] text-white w-full py-4 rounded-xl font-bold mt-4">ابدأ الآن</div>
             </button>
-            <button onClick={() => setFormType("men")} className="bg-white rounded-[2rem] p-8 border border-[#e4e2e2] shadow-sm hover:shadow-xl transition-all flex flex-col items-center group">
-              <div className="w-28 h-28 bg-[#051b12] rounded-full flex items-center justify-center mb-8"><span className="material-symbols-outlined text-[#c29b57] text-5xl">person</span></div>
-              <h3 className="text-2xl font-bold text-[#051b12] mb-2">تسجيل الرجال</h3>
+            <button onClick={() => setFormType("men")} className="bg-white rounded-[2rem] p-8 border border-[#e2e8f0] shadow-sm hover:shadow-xl transition-all flex flex-col items-center group">
+              <div className="w-28 h-28 bg-[#0f172a] rounded-full flex items-center justify-center mb-8"><span className="material-symbols-outlined text-[#c29b57] text-5xl">person</span></div>
+              <h3 className="text-2xl font-bold text-[#0f172a] mb-2">تسجيل الرجال</h3>
               <div className="bg-[#c29b57] text-white w-full py-4 rounded-xl font-bold mt-4">ابدأ الآن</div>
             </button>
           </div>
         </div>
       ) : (
         // واجهة التسجيل المتعددة (Wizard)
-        <div className="w-full max-w-2xl bg-white rounded-[2rem] shadow-sm border border-[#e4e2e2] overflow-hidden">
+        <div className="w-full max-w-2xl bg-white rounded-[2rem] shadow-sm border border-[#e2e8f0] overflow-hidden">
           <div className="px-6 pt-8 pb-4 border-b border-[#f5f3f3] relative">
-            <Link href="/" className="absolute top-8 right-6 text-slate-400 hover:text-[#051b12] transition">
+            <Link href="/" className="absolute top-8 right-6 text-slate-400 hover:text-[#0f172a] transition">
               <ChevronRight className="w-6 h-6" />
             </Link>
-            <h2 className="text-center text-lg font-bold text-[#051b12] mb-6">التسجيل</h2>
+            <h2 className="text-center text-lg font-bold text-[#0f172a] mb-6">التسجيل</h2>
             
             <div className="flex items-center justify-center max-w-sm mx-auto relative">
               <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-[#f5f3f3] -z-10 transform -translate-y-1/2"></div>
@@ -208,7 +205,7 @@ const initialFormState = {
                 <div key={i} className="flex-1 flex justify-center relative bg-white px-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors duration-300 ${
                     step === i ? "bg-[#c29b57] border-[#c29b57] text-white" : 
-                    step > i ? "bg-[#051b12] border-[#051b12] text-white" : "bg-white border-[#e4e2e2] text-[#727974]"
+                    step > i ? "bg-[#0f172a] border-[#0f172a] text-white" : "bg-white border-[#e2e8f0] text-[#727974]"
                   }`}>
                     {step > i ? <CheckCircle2 className="w-4 h-4" /> : i}
                   </div>
@@ -225,33 +222,33 @@ const initialFormState = {
                   <div className="space-y-5 animate-in fade-in duration-300">
                     <div className="text-center mb-8">
                       <p className="text-[#727974] text-xs mb-1">الخطوة 1 من 5</p>
-                      <h2 className="text-xl font-bold text-[#051b12]">المعلومات الأساسية</h2>
+                      <h2 className="text-xl font-bold text-[#0f172a]">المعلومات الأساسية</h2>
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">الاسم الأول أو المستعار <span className="text-slate-400 font-normal">(اختياري)</span></label>
-                      <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} placeholder="مثال: أبو محمد، أم خالد..." className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] focus:bg-white focus:border-[#c29b57] outline-none transition" />
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">الاسم الأول أو المستعار <span className="text-slate-400 font-normal">(اختياري)</span></label>
+                      <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} placeholder="مثال: أبو محمد، أم خالد..." className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] focus:bg-white focus:border-[#c29b57] outline-none transition" />
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">العمر</label>
-                      <select name="age" value={formData.age} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] focus:bg-white focus:border-[#c29b57] outline-none transition text-[#424844]">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">العمر</label>
+                      <select name="age" value={formData.age} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] focus:bg-white focus:border-[#c29b57] outline-none transition text-[#424844]">
                         <option value="">اختر عمرك</option>
                         {Array.from({ length: 53 }, (_, i) => i + 18).map(age => <option key={age} value={age}>{age}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">الجنسية</label>
-                      <input type="text" name="nationality" value={formData.nationality} onChange={handleChange} required placeholder="اكتب جنسيتك" className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] focus:bg-white focus:border-[#c29b57] outline-none transition" />
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">الجنسية</label>
+                      <input type="text" name="nationality" value={formData.nationality} onChange={handleChange} required placeholder="اكتب جنسيتك" className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] focus:bg-white focus:border-[#c29b57] outline-none transition" />
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">دولة الإقامة</label>
-                      <select name="country" value={formData.country} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] focus:bg-white focus:border-[#c29b57] outline-none transition text-[#424844]">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">دولة الإقامة</label>
+                      <select name="country" value={formData.country} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] focus:bg-white focus:border-[#c29b57] outline-none transition text-[#424844]">
                         <option value="">اختر دولة الإقامة</option>
                         {Object.keys(gulfCountries).map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">المدينة / المنطقة</label>
-                      <select name="region" value={formData.region} onChange={handleChange} required disabled={!formData.country} className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] focus:bg-white focus:border-[#c29b57] outline-none transition text-[#424844] disabled:opacity-50">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">المدينة / المنطقة</label>
+                      <select name="region" value={formData.region} onChange={handleChange} required disabled={!formData.country} className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] focus:bg-white focus:border-[#c29b57] outline-none transition text-[#424844] disabled:opacity-50">
                         <option value="">اختر مدينتك أو منطقتك</option>
                         {formData.country && gulfCountries[formData.country as keyof typeof gulfCountries]?.map(city => <option key={city} value={city}>{city}</option>)}
                       </select>
@@ -263,11 +260,11 @@ const initialFormState = {
                   <div className="space-y-5 animate-in fade-in duration-300">
                     <div className="text-center mb-8">
                       <p className="text-[#727974] text-xs mb-1">الخطوة 2 من 5</p>
-                      <h2 className="text-xl font-bold text-[#051b12]">البيانات العامة</h2>
+                      <h2 className="text-xl font-bold text-[#0f172a]">البيانات العامة</h2>
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">الحالة الاجتماعية</label>
-                      <select name="social_status" value={formData.social_status} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">الحالة الاجتماعية</label>
+                      <select name="social_status" value={formData.social_status} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]">
                         <option value="">اختر حالتك الاجتماعية</option>
                         {formType === "men" ? <><option>أعزب</option><option>مطلق</option><option>أرمل</option><option>متزوج</option></> : <><option>عزباء</option><option>مطلقة</option><option>أرملة</option></>}
                       </select>
@@ -276,66 +273,66 @@ const initialFormState = {
                     {formData.social_status && !(formData.social_status === "أعزب" || formData.social_status === "عزباء") && (
                       <div className="space-y-5 border-r-2 border-[#c29b57] pr-4 bg-yellow-50/30 p-4 rounded-xl">
                         <div>
-                          <label className="block mb-2 text-sm font-bold text-[#051b12]">الأبناء</label>
-                          <select name="has_children" value={formData.has_children} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-white outline-none focus:border-[#c29b57]">
+                          <label className="block mb-2 text-sm font-bold text-[#0f172a]">الأبناء</label>
+                          <select name="has_children" value={formData.has_children} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-white outline-none focus:border-[#c29b57]">
                             <option value="">هل يوجد أبناء؟</option><option>لا يوجد</option><option>يوجد أبناء</option>
                           </select>
                         </div>
                         {formData.has_children === "يوجد أبناء" && (
                           <div>
-                            <label className="block mb-2 text-sm font-bold text-[#051b12]">عدد الأبناء</label>
-                            <input type="number" name="children_count" value={formData.children_count} onChange={handleChange} min="1" required placeholder="كم عدد الأبناء؟" className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-white outline-none focus:border-[#c29b57]" />
+                            <label className="block mb-2 text-sm font-bold text-[#0f172a]">عدد الأبناء</label>
+                            <input type="number" name="children_count" value={formData.children_count} onChange={handleChange} min="1" required placeholder="كم عدد الأبناء؟" className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-white outline-none focus:border-[#c29b57]" />
                           </div>
                         )}
                       </div>
                     )}
 
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">المستوى التعليمي</label>
-                      <select name="education_level" value={formData.education_level} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">المستوى التعليمي</label>
+                      <select name="education_level" value={formData.education_level} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]">
                         <option value="">اختر مستواك التعليمي</option><option>ثانوي</option><option>دبلوم</option><option>بكالوريوس</option><option>ماجستير</option><option>دكتوراه</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">الوظيفة</label>
-                      <input type="text" name="job" value={formData.job} onChange={handleChange} required placeholder="اختر وظيفتك" className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]" />
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">الوظيفة</label>
+                      <input type="text" name="job" value={formData.job} onChange={handleChange} required placeholder="اختر وظيفتك" className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]" />
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">الحالة المادية</label>
-                      <select name="wealth_level" value={formData.wealth_level} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">الحالة المادية</label>
+                      <select name="wealth_level" value={formData.wealth_level} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]">
                         <option value="">اختر حالتك المادية</option><option>بسيط</option><option>متوسط</option><option>جيد</option><option>ممتاز</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">الرغبة في الإنجاب</label>
-                      <select name="want_children" value={formData.want_children} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">الرغبة في الإنجاب</label>
+                      <select name="want_children" value={formData.want_children} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]">
                         <option value="">اختر رغبتك</option><option>نعم</option><option>لا</option><option>يناقش لاحقاً</option>
                       </select>
                     </div>
 
                     {formType === "men" && (
                       <div>
-                        <label className="block mb-2 text-sm font-bold text-[#051b12]">نوع السكن</label>
-                        <select name="housing_type" value={formData.housing_type} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]">
+                        <label className="block mb-2 text-sm font-bold text-[#0f172a]">نوع السكن</label>
+                        <select name="housing_type" value={formData.housing_type} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]">
                           <option value="">اختر نوع السكن</option><option>سكن مستقل</option><option>مع العائلة</option><option>أخرى</option>
                         </select>
                       </div>
                     )}
 
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">التدخين</label>
-                      <select name="smoking" value={formData.smoking} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">التدخين</label>
+                      <select name="smoking" value={formData.smoking} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]">
                         <option value="">اختر موقفك من التدخين</option><option>لا أدخن</option><option>أدخن</option><option>شيشة / إلكتروني</option>
                       </select>
                     </div>
                     <div className="flex gap-4">
                       <div className="w-1/2">
-                        <label className="block mb-2 text-sm font-bold text-[#051b12]">الطول (سم)</label>
-                        <input type="number" name="height" value={formData.height} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]" />
+                        <label className="block mb-2 text-sm font-bold text-[#0f172a]">الطول (سم)</label>
+                        <input type="number" name="height" value={formData.height} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]" />
                       </div>
                       <div className="w-1/2">
-                        <label className="block mb-2 text-sm font-bold text-[#051b12]">الوزن (كجم)</label>
-                        <input type="number" name="weight" value={formData.weight} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]" />
+                        <label className="block mb-2 text-sm font-bold text-[#0f172a]">الوزن (كجم)</label>
+                        <input type="number" name="weight" value={formData.weight} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]" />
                       </div>
                     </div>
                   </div>
@@ -345,82 +342,90 @@ const initialFormState = {
                   <div className="space-y-5 animate-in fade-in duration-300">
                     <div className="text-center mb-8">
                       <p className="text-[#727974] text-xs mb-1">الخطوة 3 من 5</p>
-                      <h2 className="text-xl font-bold text-[#051b12]">نبذة ومواصفات الطرف الآخر</h2>
+                      <h2 className="text-xl font-bold text-[#0f172a]">نبذة ومواصفات الطرف الآخر</h2>
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">نوع الزواج المطلوب</label>
-                      <select name="marriage_type" value={formData.marriage_type} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57]">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">نوع الزواج المطلوب</label>
+                      <select name="marriage_type" value={formData.marriage_type} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]">
                         <option value="">اختر نوع الزواج</option><option>معلن</option><option>مسيار</option><option>لا يوجد تفضيل</option>
                       </select>
                     </div>
                     
                     <div className="space-y-5 border-r-2 border-[#c29b57] pr-4 bg-yellow-50/30 p-4 rounded-xl">
                       <div>
-                        <label className="block mb-2 text-sm font-bold text-[#051b12]">الأصل</label>
-                        <select name="origin" value={formData.origin} onChange={handleChange} required className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-white outline-none focus:border-[#c29b57]">
+                        <label className="block mb-2 text-sm font-bold text-[#0f172a]">الأصل</label>
+                        <select name="origin" value={formData.origin} onChange={handleChange} required className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-white outline-none focus:border-[#c29b57]">
                           <option value="">اختر...</option><option>قبلي</option><option>غير قبلي</option><option>لا يهم</option>
                         </select>
                       </div>
                       {formData.origin === "قبلي" && (
                         <div>
-                          <label className="block mb-2 text-sm font-bold text-[#051b12]">اسم القبيلة <span className="text-slate-400 font-normal">(اختياري)</span></label>
-                          <input type="text" name="tribe_name" value={formData.tribe_name} onChange={handleChange} placeholder="اكتب اسم القبيلة" className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-white outline-none focus:border-[#c29b57]" />
+                          <label className="block mb-2 text-sm font-bold text-[#0f172a]">اسم القبيلة <span className="text-slate-400 font-normal">(اختياري)</span></label>
+                          <input type="text" name="tribe_name" value={formData.tribe_name} onChange={handleChange} placeholder="اكتب اسم القبيلة" className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-white outline-none focus:border-[#c29b57]" />
                         </div>
                       )}
                     </div>
                     
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">نبذة عنك</label>
-                      <textarea name="bio" value={formData.bio} onChange={handleChange} required rows={4} placeholder="اكتب نبذة مختصرة عنك..." className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57] resize-none" />
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">نبذة عنك</label>
+                      <textarea name="bio" value={formData.bio} onChange={handleChange} required rows={4} placeholder="اكتب نبذة مختصرة عنك..." className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57] resize-none" />
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">مواصفات الطرف الآخر</label>
-                      <textarea name="requirements" value={formData.requirements} onChange={handleChange} required rows={4} placeholder="المواصفات المطلوبة..." className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57] resize-none" />
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">مواصفات الطرف الآخر</label>
+                      <textarea name="requirements" value={formData.requirements} onChange={handleChange} required rows={4} placeholder="المواصفات المطلوبة..." className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57] resize-none" />
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">الحالة الصحية</label>
-                      <input type="text" name="health_status" value={formData.health_status} onChange={handleChange} required placeholder="مثال: سليم ولله الحمد..." className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] focus:bg-white focus:border-[#c29b57] outline-none transition" />
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">الحالة الصحية</label>
+                      <input type="text" name="health_status" value={formData.health_status} onChange={handleChange} required placeholder="مثال: سليم ولله الحمد..." className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] focus:bg-white focus:border-[#c29b57] outline-none transition" />
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12]">ملاحظات إضافية <span className="text-slate-400 font-normal">(اختياري)</span></label>
-                      <textarea name="notes" value={formData.notes} onChange={handleChange} rows={2} className="w-full border border-[#e4e2e2] rounded-xl p-4 bg-[#fbf9f8] outline-none focus:border-[#c29b57] resize-none" />
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">ملاحظات إضافية <span className="text-slate-400 font-normal">(اختياري)</span></label>
+                      <textarea name="notes" value={formData.notes} onChange={handleChange} rows={2} className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57] resize-none" />
                     </div>
                   </div>
                 )}
 
                 {step === 4 && (
                   <div className="space-y-6 animate-in fade-in duration-300">
-                    <div className="text-center mb-8">
-                      <p className="text-[#727974] text-xs mb-1">الخطوة 4 من 5</p>
-                      <h2 className="text-xl font-bold text-[#051b12]">التحقق والتواصل</h2>
+                    <div className="text-center mb-6">
+                      <p className="text-slate-500 text-xs mb-1">الخطوة 4 من 5</p>
+                      <h2 className="text-xl font-bold text-[#0f172a]">التحقق والتواصل</h2>
                       <Phone className="w-12 h-12 text-[#c29b57] mx-auto mt-4 opacity-80" />
                     </div>
+
+                    {/* رسالة التنبيه المطلوبة في المخطط بالحرف */}
+                    <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center">
+                      <p className="text-xs leading-relaxed text-blue-800 font-medium">
+                        رقم الجوال محفوظ بسرية تامة، ويستخدم فقط للتحقق من جدية الطلب والتواصل المتعلق بملفك، ولن يتم نشره أو مشاركته مع أي طرف آخر.
+                      </p>
+                    </div>
+
                     <div>
-                      <label className="block mb-2 text-sm font-bold text-[#051b12] text-center">رقم الجوال</label>
-                      <div className="flex border border-[#e4e2e2] rounded-xl overflow-hidden focus-within:border-[#c29b57] transition bg-white" dir="ltr">
-                        <span className="inline-flex items-center px-4 bg-[#fbf9f8] border-r border-[#e4e2e2] text-[#051b12] font-bold text-sm">
+                      <label className="block mb-2 text-sm font-bold text-[#0f172a] text-center">رقم الجوال</label>
+                      <div className="flex border border-slate-200 rounded-xl overflow-hidden focus-within:border-[#c29b57] transition bg-white" dir="ltr">
+                        <span className="inline-flex items-center px-4 bg-[#f8fafc] border-r border-slate-200 text-[#0f172a] font-bold text-sm">
                           {formData.country ? getDialCode(formData.country) : "+966"} <span className="mr-2">🇸🇦</span>
                         </span>
                         <input 
                           type="tel" name="whatsapp_number" value={formData.whatsapp_number} onChange={handlePhoneChange} required placeholder="05XXXXXXXX"
-                          className="flex-1 w-full p-4 bg-transparent text-[#051b12] font-medium outline-none text-left" 
+                          className="flex-1 w-full p-4 bg-transparent text-[#0f172a] font-medium outline-none text-left" 
                         />
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4 justify-center">
-                      <input type="checkbox" required id="privacy" className="w-4 h-4 accent-[#051b12]" />
-                      <label htmlFor="privacy" className="text-sm font-bold text-[#051b12]">أوافق على سياسة الخصوصية</label>
+                      <input type="checkbox" required id="privacy" className="w-4 h-4 accent-[#0f172a]" />
+                      <label htmlFor="privacy" className="text-sm font-bold text-[#0f172a]">أوافق على سياسة الخصوصية</label>
                     </div>
                   </div>
                 )}
-
                 <div className="flex gap-4 pt-6 mt-4">
                   {step > 1 && (
-                    <button type="button" onClick={prevStep} className="px-6 py-4 rounded-xl font-bold text-[#051b12] border border-[#e4e2e2] bg-white hover:bg-[#fbf9f8] transition">
+                    <button type="button" onClick={prevStep} className="px-6 py-4 rounded-xl font-bold text-[#0f172a] border border-[#e2e8f0] bg-white hover:bg-[#f8fafc] transition">
                       السابق
                     </button>
                   )}
-                  <button type="submit" className="flex-1 py-4 rounded-xl font-bold text-white bg-[#051b12] hover:bg-[#1a3026] transition shadow-md">
+
+                  <button type="submit" className="flex-1 py-4 rounded-xl font-bold text-white bg-[#0f172a] hover:bg-[#1a3026] transition shadow-md">
                     {step === 4 ? "إرسال رمز التحقق" : "التالي"}
                   </button>
                 </div>
@@ -429,17 +434,17 @@ const initialFormState = {
               <form onSubmit={handleFinalSubmit} className="space-y-6 animate-in zoom-in-95 duration-300 text-center">
                 <div className="text-center mb-8">
                   <ShieldCheck className="w-12 h-12 text-[#c29b57] mx-auto mb-2" />
-                  <h2 className="text-2xl font-bold text-[#051b12] mb-2">إدخال رمز التحقق</h2>
-                  <p className="text-[#424844] text-sm">تم إرسال رمز التحقق إلى: <span className="font-bold text-[#051b12]" dir="ltr">{getDialCode(formData.country)} {formData.whatsapp_number}</span></p>
+                  <h2 className="text-2xl font-bold text-[#0f172a] mb-2">إدخال رمز التحقق</h2>
+                  <p className="text-[#424844] text-sm">تم إرسال رمز التحقق إلى: <span className="font-bold text-[#0f172a]" dir="ltr">{getDialCode(formData.country)} {formData.whatsapp_number}</span></p>
                 </div>
                 <div className="max-w-xs mx-auto mb-8">
-                  <input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={4} placeholder="----" required className="w-full text-center text-3xl tracking-[1em] font-bold border-b-2 border-[#e4e2e2] bg-transparent py-4 outline-none focus:border-[#c29b57] transition" dir="ltr" />
+                  <input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={4} placeholder="----" required className="w-full text-center text-3xl tracking-[1em] font-bold border-b-2 border-[#e2e8f0] bg-transparent py-4 outline-none focus:border-[#c29b57] transition" dir="ltr" />
                 </div>
                 <div className="flex flex-col gap-3 pt-4">
-                  <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-bold text-white bg-[#051b12] hover:bg-[#1a3026] transition shadow-md">
+                  <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-bold text-white bg-[#0f172a] hover:bg-[#1a3026] transition shadow-md">
                     {loading ? "جاري الاعتماد..." : "تحقق من الرمز"}
                   </button>
-                  <button type="button" onClick={() => setShowOtpScreen(false)} disabled={loading} className="w-full py-4 rounded-xl font-bold text-[#051b12] bg-white border border-[#e4e2e2] hover:bg-[#fbf9f8] transition">
+                  <button type="button" onClick={() => setShowOtpScreen(false)} disabled={loading} className="w-full py-4 rounded-xl font-bold text-[#0f172a] bg-white border border-[#e2e8f0] hover:bg-[#f8fafc] transition">
                     السابق
                   </button>
                 </div>

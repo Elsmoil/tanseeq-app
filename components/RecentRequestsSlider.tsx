@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { databases } from "@/lib/appwrite";
 import { Query } from "appwrite";
-import { MapPin, Loader2, ShieldCheck, Heart, Ring } from "lucide-react"; // إضافة أيقونات جديدة
+import { MapPin, Loader2, ShieldCheck, Heart } from "lucide-react"; // إضافة أيقونات جديدة
 import Link from "next/link";
 
 // أيقونة الخاتم

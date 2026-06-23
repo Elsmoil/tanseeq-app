@@ -1,107 +1,204 @@
-// app/services/page.tsx
 "use client";
 
-import { Scale, HeartHandshake, Users, ChevronRight, Sparkles } from "lucide-react";
+import { Scale, Users, Heart, Sparkles, Camera, Building2, Car, Gift, ChevronLeft, MessageCircle, ChevronRight, Bell } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
+// تصميم فروع الشجر الذهبية للعنوان
+const LaurelSvg = ({ className, flipped }: { className?: string, flipped?: boolean }) => (
+  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ transform: flipped ? 'scaleX(-1)' : 'none' }}>
+    <path d="M10 30 C 10 20, 15 10, 30 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M 17 22 C 14 18, 13 14, 18 12 C 21 16, 22 20, 17 22 Z" fill="currentColor" />
+    <path d="M 12 30 C 8 26, 7 21, 12 18 C 15 22, 16 27, 12 30 Z" fill="currentColor" />
+    <path d="M 24 14 C 21 10, 20 6, 26 4 C 29 8, 30 13, 24 14 Z" fill="currentColor" />
+  </svg>
+);
 
 export default function ServicesPage() {
-  const router = useRouter();
 
   const services = [
     {
       id: 1,
       title: "مأذون شرعي",
-      description: "نوفر لك تواصلاً مباشراً مع مأذوني أنكحة معتمدين لتسهيل وتوثيق عقد الزواج بكل يسر وسهولة، وفق الإجراءات الرسمية.",
-      icon: <Scale className="w-8 h-8 text-[#c29b57]" />,
+      description: "إتمام عقد الزواج بطريقة نظامية ومعتمدة.",
+      icon: <Scale className="w-7 h-7 md:w-8 md:h-8 text-[#8c6b3e]" />,
       available: true
     },
     {
       id: 2,
-      title: "خدمة الخطابات",
-      description: "نخبة من الخطابات الموثوقات لمساعدتك في البحث الدقيق والمخصص عن شريك حياتك المناسب بسرية تامة وموثوقية عالية.",
-      icon: <HeartHandshake className="w-8 h-8 text-[#c29b57]" />,
+      title: "خطابات",
+      description: "مساعدة في التوفيق بين الطرفين وترتيب التواصل.",
+      icon: <Users className="w-7 h-7 md:w-8 md:h-8 text-[#8c6b3e]" />,
       available: true
     },
     {
       id: 3,
       title: "استشارات أسرية",
-      description: "مستشارون أسريون متخصصون لتقديم التوجيه والنصح للمقبلين على الزواج، لضمان بناء أسرة مستقرة وسعيدة.",
-      icon: <Users className="w-8 h-8 text-[#c29b57]" />,
-      available: false // لتوضيح أنها قادمة قريباً
+      description: "استشارات قبل الزواج وبعده مع مختصين.",
+      icon: <Heart className="w-7 h-7 md:w-8 md:h-8 text-[#8c6b3e]" />,
+      available: false
+    },
+    {
+      id: 4,
+      title: "كوافيرات وتجهيز العروس",
+      description: "ترشيح أفضل الكوافيرات ومراكز التجميل.",
+      icon: <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-[#8c6b3e]" />,
+      available: false
+    },
+    {
+      id: 5,
+      title: "تصوير المناسبات",
+      description: "حجز مصورين ومصورات لجلسات الزفاف.",
+      icon: <Camera className="w-7 h-7 md:w-8 md:h-8 text-[#8c6b3e]" />,
+      available: false
+    },
+    {
+      id: 6,
+      title: "قاعات الزواج",
+      description: "مساعدة في اختيار القاعة المناسبة لاحتياجك.",
+      icon: <Building2 className="w-7 h-7 md:w-8 md:h-8 text-[#8c6b3e]" />,
+      available: false
+    },
+    {
+      id: 7,
+      title: "تنسيق الضيافة والتنقل",
+      description: "خدمات الضيافة والسيارات حسب طلبك.",
+      icon: <Car className="w-7 h-7 md:w-8 md:h-8 text-[#8c6b3e]" />,
+      available: false
+    },
+    {
+      id: 8,
+      title: "هدايا وتجهيزات",
+      description: "تجهيز الهدايا والشبكات وكافة المستلزمات.",
+      icon: <Gift className="w-7 h-7 md:w-8 md:h-8 text-[#8c6b3e]" />,
+      available: false
     }
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans pb-24 md:pb-10" dir="rtl">
+  <div className="min-h-screen bg-[#0f172a] font-sans antialiased" dir="rtl">
       
-      {/* الهيدر */}
-      <div className="bg-[#0f172a] pt-14 pb-24 px-6 text-center rounded-b-[3rem] relative shadow-lg">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#c29b57] rounded-full blur-[100px] opacity-10 -mr-20 -mt-20"></div>
+      {/* 1. الهيدر الكحلي العلوي - تم تقليل المسافة السفلية (pb-12 بدلاً من pb-20) لرفع المحتوى الأبيض */}
+      <div className="pt-6 pb-12 px-4 relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#c29b57] rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
         
-        <div className="flex justify-between items-center mb-6 relative z-10 max-w-5xl mx-auto px-2">
-          <button onClick={() => router.back()} className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition backdrop-blur-sm">
-            <ChevronRight size={20} />
+        <div className="relative z-10 max-w-5xl mx-auto flex items-center justify-between">
+          {/* تصغير الأزرار العلوية قليلاً لتبدو أرق (w-9 h-9) */}
+          <button className="w-9 h-9 border border-slate-700 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
-          <div className="w-10"></div>
+          
+          <div className="flex flex-col items-center">
+  <h1 className="text-[28px] md:text-3xl font-black text-white tracking-tight mb-0.5">ميثاق</h1>
+  {/* تم التكبير إلى text-xs مع زيادة السماكة font-semibold */}
+  <p className="text-xs md:text-sm text-[#c29b57] font-semibold tracking-wide mt-1">منصة زواج موثوقة</p>
+</div>
+          <button className="w-9 h-9 border border-slate-700 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition">
+            <Bell size={16} />
+          </button>
         </div>
-
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 relative z-10">خدمات ميثاق</h1>
-        <p className="text-sm text-[#c29b57] relative z-10 max-w-md mx-auto leading-relaxed">
-          نقدم لك مجموعة من الخدمات المساندة المتكاملة لتسهيل رحلتك نحو زواج ناجح ومستقر.
-        </p>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 -mt-12 relative z-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {services.map((service) => (
-            <div key={service.id} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group relative overflow-hidden">
-              
-              {/* تأثير جمالي عند التمرير */}
-              <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#c29b57]/5 rounded-full blur-2xl group-hover:bg-[#c29b57]/10 transition-colors"></div>
-
-              <div className="w-16 h-16 bg-[#0f172a] rounded-2xl flex items-center justify-center mb-6 shadow-md relative z-10 transform group-hover:-translate-y-1 transition-transform">
-                {service.icon}
-              </div>
-              
-              <h2 className="text-xl font-bold text-[#0f172a] mb-3 relative z-10">{service.title}</h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-8 flex-1 relative z-10">
-                {service.description}
-              </p>
-
-              <div className="relative z-10">
-                {service.available ? (
-                  <a 
-                    href={`https://wa.me/966527585083?text=السلام عليكم، أود الاستفسار عن خدمة (${service.title}).`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3.5 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all shadow-sm bg-slate-50 text-[#0f172a] border border-slate-200 hover:bg-[#0f172a] hover:text-white hover:border-[#0f172a]"
-                  >
-                    طلب الخدمة
-                  </a>
-                ) : (
-                  <div className="w-full py-3.5 rounded-xl text-sm font-bold flex justify-center items-center gap-2 bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed">
-                    <Sparkles size={16} /> قريباً
-                  </div>
-                )}
-              </div>
+      {/* 2. المحتوى الأبيض المنحني - تم تقليل padding-top (pt-8 بدلاً من pt-10) */}
+      <div className="bg-[#fdfdfc] rounded-t-[2.5rem] md:rounded-t-[3rem] px-4 pt-8 pb-28 -mt-6 relative z-20 min-h-screen shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
+        <div className="max-w-5xl mx-auto">
+          
+          {/* عنوان القسم - تم تقليل المسافة السفلية (mb-6 بدلاً من mb-8) */}
+          <div className="flex flex-col items-center justify-center mb-6">
+            <div className="flex items-center gap-3 mb-1">
+              <LaurelSvg className="w-5 h-5 md:w-7 md:h-7 text-[#c29b57]" />
+              <h2 className="text-xl md:text-2xl font-extrabold text-[#0f172a]">خدمات الزواج</h2>
+              <LaurelSvg className="w-5 h-5 md:w-7 md:h-7 text-[#c29b57]" flipped />
             </div>
-          ))}
-        </div>
+            <p className="text-slate-600 text-[13px] md:text-base font-semibold mt-1">نرافقك في جميع خطوات الزواج</p>
+          </div>
 
-        {/* بانر سفلي تحفيزي */}
-        <div className="mt-12 bg-[#c29b57] rounded-3xl p-8 text-center shadow-lg relative overflow-hidden">
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-10"></div>
-           <h3 className="text-white font-bold text-xl mb-2 relative z-10">هل تحتاج لمساعدة خاصة؟</h3>
-           <p className="text-[#0f172a] font-medium text-sm mb-6 relative z-10 max-w-lg mx-auto">
-             فريق ميثاق متواجد دائماً للرد على استفساراتك وتقديم الدعم اللازم لك في أي وقت.
-           </p>
-           <a href="https://wa.me/966527585083" target="_blank" rel="noopener noreferrer" className="inline-block bg-[#0f172a] text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-[#1e293b] transition-colors relative z-10">
-             تواصل مع الدعم الفني
-           </a>
-        </div>
+          {/* البانر العلوي (مع صورة الخلفية) - تم تصغير الارتفاع بشكل ملحوظ ليكون بانر نحيف وأنيق */}
+          <div className="relative rounded-[1.2rem] overflow-hidden mb-8 shadow-sm h-[100px] md:h-32 flex flex-col items-center justify-center text-center">
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center"></div>
+            
+            {/* تعتيم متدرج ومناسب لإبراز النص */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/95 via-[#0f172a]/60 to-[#0f172a]/40"></div>
+            
+            <div className="relative z-10 px-4 w-full flex flex-col items-center justify-center mt-1">
+              {/* تصغير حجم الخط ليتناسب مع البانر النحيف */}
+              <h3 className="text-lg md:text-xl font-extrabold leading-tight drop-shadow-md">
+                <span className="text-[#c29b57]">كل ما تحتاجه لإتمام زواجك</span>
+                <span className="text-white block mt-0.5">في مكان واحد</span>
+              </h3>
+              
+              {/* استخدام أيقونة القلب العادية (تأكد من استيراد Heart من lucide-react) */}
+              <Heart className="w-4 h-4 text-[#c29b57] mx-auto mt-1.5 drop-shadow-sm" />
+            </div>
+          </div>
+          {/* شبكة الخدمات */}
+          <div className="grid grid-cols-2 gap-2 md:gap-6 mb-10">
+            {services.map((service) => (
+              <div key={service.id} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-6 border border-slate-100 shadow-sm flex flex-col justify-between text-center md:text-right">
+                
+               {/* ترتيب المحتوى: عمودي في الجوال (أيقونة ثم نص) وأفقي في الكمبيوتر */}
+             <div className="flex flex-col items-center gap-3 mb-4">
+  <div className="w-14 h-14 bg-[#fdfaf4] border border-[#ebd9b4] rounded-full flex items-center justify-center flex-shrink-0">
+    {service.icon}
+  </div>
+  <div className="text-center mt-1">
+    {/* زيادة سماكة العنوان (font-extrabold) وتغيير اللون للأسود الكحلي وتقارب الحروف قليلاً */}
+    <h4 className="text-[15px] md:text-lg font-extrabold text-[#0f172a] mb-1.5 tracking-tight">{service.title}</h4>
+    
+    {/* تغميق اللون (slate-600)، زيادة الوزن (font-medium)، وزيادة المسافة بين السطور (leading-relaxed) */}
+    <p className="text-slate-800 text-[11px] md:text-xs font-semibold leading-relaxed px-1 max-w-[170px] mx-auto">
+      {service.description}
+    </p>
+  </div>
+</div>
+              {/* إصلاح مسافة الزر ليتمدد بشكل صحيح */}
+              <div className="mt-auto w-full">                  {service.available ? (
+                    <a 
+                      href={`https://wa.me/966527585083?text=السلام عليكم، أود الاستفسار عن خدمة (${service.title}).`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 md:py-2.5 rounded-full text-[11px] md:text-xs font-bold flex justify-center items-center gap-2 transition-all border border-[#c29b57] text-[#c29b57] hover:bg-[#c29b57] hover:text-white"
+                    >
+                      لطلب الخدمة <ChevronLeft size={14} />
+                    </a>
+                  ) : (
+                    <div className="w-full py-2 md:py-2.5 rounded-full text-[11px] md:text-xs font-bold flex justify-center items-center gap-2 bg-white text-slate-400 border border-slate-200 cursor-not-allowed">
+                      قريباً
+                    </div>
+                  )}
+                </div>
 
+              </div>
+            ))}
+          </div>
+
+        {/* البانر السفلي (تطابق 100% مع التصميم - مع أيقونة واتساب رسمية وواضحة) */}
+<div className="bg-[#0f172a] rounded-[1.5rem] flex flex-col items-center justify-center p-6 mb-6 mt-4 gap-5">
+  
+  <div className="text-center w-full">
+    <h4 className="text-white font-bold text-[15px] md:text-lg mb-2">لا تجد الخدمة التي تبحث عنها؟</h4>
+    <p className="text-slate-300 text-[10px] md:text-xs leading-relaxed max-w-[280px] mx-auto">
+      نسعد بخدمتك في جميع احتياجات الزواج، ونوفر لك أفضل الحلول والتنسيق من البداية حتى اكتمال المناسبة.
+    </p>
+  </div>
+  
+  <a 
+    href="https://wa.me/966527585083" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="w-full bg-transparent border border-[#c29b57] text-[#c29b57] py-2.5 rounded-full font-bold transition-colors flex items-center justify-center gap-3 hover:bg-[#c29b57]/10"
+  >
+    <span className="text-right leading-tight text-[11px] md:text-xs">تواصل معنا عبر<br/>واتساب</span>
+    
+    <div className="bg-[#25D366] w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0">
+      {/* تم استخدام أيقونة واتساب القياسية لتعمل بشكل مثالي */}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="w-5 h-5 fill-white">
+        <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+      </svg>
+    </div>
+  </a>
+</div>       </div>
       </div>
     </div>
   );
 }
+

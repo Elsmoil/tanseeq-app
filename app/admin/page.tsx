@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Menu, Search, Check, AlertCircle, LayoutDashboard, Users, User, Settings, X, ShieldCheck, Clock, XCircle, Bell, ChevronLeft, Save, Eye, MapPin } from "lucide-react";
+import { Loader2, Menu, Search, CheckCircle2, AlertCircle, LayoutDashboard, Users, User, Settings, X, ShieldCheck, Clock, XCircle, Bell, ChevronLeft, Save, Eye, MapPin } from "lucide-react";
 import PlaceholderAvatar from "@/components/PlaceholderAvatar";
-import { databases, account } from "@/lib/appwrite";
-import { Query } from "appwrite";
+import { account } from "@/lib/appwrite"; // 💡 استدعاء حسابات Appwrite
 
-// أيقونة الخاتم المخصصة للنافذة المنبثقة
 const RingIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M8.5 7.5L12 3l3.5 4.5h-7z" />
@@ -16,41 +14,95 @@ const RingIcon = ({ size = 24, className = "" }) => (
 
 export default function AdminDashboard() {
   const [requests, setRequests] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // تم تغييرها لتعمل بعد الدخول
   const [errorMsg, setErrorMsg] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   
-  // حالات الفلترة لصفحة إدارة الطلبات
   const [activeTab, setActiveTab] = useState<"all" | "approved" | "pending" | "rejected">("all");
   const [searchQuery, setSearchQuery] = useState("");
   
-  // حالة التحكم بالواجهة والقائمة
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentMenu, setCurrentMenu] = useState<"overview" | "users" | "settings">("users");
 
-  // حقول التحكم بالنافذة المنبثقة لتفاصيل المستخدم
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // جلب الطلبات من القاعدة
+  // 💡 حالات مصادقة Appwrite للإدارة
+  const [isAdminAuth, setIsAdminAuth] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  // 1. التحقق من وجود جلسة Appwrite نشطة عند فتح الصفحة
+  useEffect(() => {
+    checkAdminAuth();
+  }, []);
+
+  const checkAdminAuth = async () => {
+    try {
+      const user = await account.get();
+      // 💡 ضع إيميل الإدارة الخاص بك هنا
+      if (user.email === 'admin@methaq.com' || user.email === 'your-email@example.com') {
+        setIsAdminAuth(true);
+        fetchRequests(); // جلب البيانات بعد التأكد من الهوية
+      } else {
+        // إذا كان مسجلاً لكنه ليس المدير، نقوم بتسجيل خروجه
+        await account.deleteSession('current');
+        setLoginError("هذا الحساب لا يملك صلاحيات الإدارة.");
+      }
+    } catch (error) {
+      // لا توجد جلسة نشطة
+      console.log("Admin not logged in");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // 2. تسجيل الدخول باستخدام Appwrite
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setLoginError("");
+
+    try {
+      // إنشاء جلسة عبر Appwrite
+      await account.createEmailPasswordSession(email, password);
+      // التحقق من أن الحساب الذي دخل هو حساب المدير
+      await checkAdminAuth();
+    } catch (error: any) {
+      console.error("Login failed:", error);
+      setLoginError("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+      setAuthLoading(false);
+    }
+  };
+
+  // تسجيل الخروج
+  const handleLogout = async () => {
+    if (window.confirm("هل أنت متأكد من تسجيل الخروج؟")) {
+      try {
+        await account.deleteSession('current');
+        setIsAdminAuth(false);
+        setRequests([]);
+      } catch (error) {
+        console.error("Logout error", error);
+      }
+    }
+  };
+
+  // 3. جلب الطلبات من الـ API الآمن (السيرفر)
   const fetchRequests = async () => {
     setLoading(true);
     setErrorMsg("");
     try {
-      if (!process.env.NEXT_PUBLIC_APPWRITE_DB_ID || !process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID) {
-        throw new Error("متغيرات البيئة غير مكتملة.");
-      }
-
-      const response = await databases.listDocuments(
-        process.env.NEXT_PUBLIC_APPWRITE_DB_ID,
-        process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID,
-        [Query.limit(100)] 
-      );
+      const res = await fetch('/api/admin/requests');
+      const data = await res.json();
       
-      const sortedDocs = response.documents.sort(
-        (a, b) => new Date(b.$createdAt).getTime() - new Date(a.$createdAt).getTime()
-      );
-      setRequests(sortedDocs);
+      if (data.success) {
+        setRequests(data.documents);
+      } else {
+        throw new Error(data.error);
+      }
     } catch (error: any) {
       console.error("Error fetching requests:", error);
       setErrorMsg("حدث خطأ أثناء جلب البيانات. تأكد من إعدادات قاعدة البيانات.");
@@ -58,57 +110,25 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
-  const [isAdminAuth, setIsAdminAuth] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAdminAuth = async () => {
-      try {
-        const user = await account.get();
-        // هنا يمكنك التحقق من إيميل المدير المعتمد أو إذا كان لديه تصنيف (Labels/Roles)
-        // كمثال بسيط: التحقق من إيميل معين (قم بتغييره لإيميلك الإداري)
-        if ( user.email === 'admin@methaq.com' || user.email === 'your-email@example.com') {
-          setIsAdminAuth(true);
-        } else {
-          // مستخدم عادي مسجل دخوله، يطرد للرئيسية
-          window.location.href = '/'; 
-        }
-      } catch (error) {
-        // غير مسجل دخول
-        console.error("Not authenticated");
-        window.location.href = '/';
-      } finally {
-        setAuthLoading(false);
-      }
-    };
-    checkAdminAuth();
-  }, []);
-
-  // شاشة تحميل بيضاء بالكامل تظهر أثناء التحقق من الهوية (لمنع الوميض السريع للصفحة)
-  if (authLoading) {
-    return <div className="min-h-screen bg-[#fcfaf6] flex items-center justify-center"><Loader2 className="w-10 h-10 text-[#c29b57] animate-spin" /></div>;
-  }
-
-  // إذا لم يكن مصرحاً له، لا تعرض شيئاً (سيتم تحويله تلقائياً من الـ useEffect)
-  if (!isAdminAuth) return null;
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
-  // دالة تغيير حالة الطلب
+  // 4. تحديث حالة الطلب عبر الـ API الآمن
   const updateStatus = async (id: string, newStatus: string) => {
     setActionLoading(id);
     try {
-      await databases.updateDocument(
-        process.env.NEXT_PUBLIC_APPWRITE_DB_ID as string,
-        process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID as string,
-        id,
-        { status: newStatus }
-      );
-      setRequests(requests.map(req => req.$id === id ? { ...req, status: newStatus } : req));
-      // تحديث البيانات داخل النافذة المنبثقة إذا كانت مفتوحة لتعكس الحالة فوراً
-      if (selectedUser && selectedUser.$id === id) {
-        setSelectedUser({ ...selectedUser, status: newStatus });
+      const res = await fetch('/api/admin/requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: id, newStatus })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setRequests(requests.map(req => req.$id === id ? { ...req, status: newStatus } : req));
+        if (selectedUser && selectedUser.$id === id) {
+          setSelectedUser({ ...selectedUser, status: newStatus });
+        }
+      } else {
+        throw new Error(data.error);
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -118,7 +138,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // فلترة الطلبات
   const filteredRequests = requests.filter(req => {
     const matchesTab = 
       activeTab === "all" ||
@@ -136,16 +155,56 @@ export default function AdminDashboard() {
     return matchesTab && matchesSearch;
   });
 
-  // فتح نافذة تفاصيل ملف العضو
   const handleOpenDetails = (user: any) => {
     setSelectedUser(user);
     setIsModalOpen(true);
   };
 
+  // ================= شاشة التحميل والدخول =================
+
+  if (authLoading) {
+    return <div className="min-h-screen bg-[#0f172a] flex items-center justify-center"><Loader2 className="w-12 h-12 text-[#c29b57] animate-spin" /></div>;
+  }
+
+  if (!isAdminAuth) {
+    return (
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4" dir="rtl">
+        <form onSubmit={handleAdminLogin} className="bg-white p-8 rounded-[2rem] shadow-xl max-w-sm w-full text-center animate-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100 shadow-inner">
+            <ShieldCheck className="w-10 h-10 text-[#c29b57]" />
+          </div>
+          <h2 className="text-2xl font-black text-[#0f172a] mb-2">تسجيل الدخول للإدارة</h2>
+          <p className="text-sm text-slate-500 mb-8 font-medium">يرجى إدخال بيانات المدير للوصول للوحة التحكم.</p>
+          
+          {loginError && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-bold mb-6 border border-red-100">{loginError}</div>}
+
+          <div className="space-y-4 mb-6">
+            <input 
+              type="email" value={email} onChange={(e) => setEmail(e.target.value)} 
+              placeholder="البريد الإلكتروني..." required dir="ltr"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-center text-sm outline-none focus:border-[#c29b57] transition-colors text-[#0f172a]"
+            />
+            <input 
+              type="password" value={password} onChange={(e) => setPassword(e.target.value)} 
+              placeholder="كلمة المرور..." required dir="ltr"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-center text-sm tracking-widest outline-none focus:border-[#c29b57] transition-colors text-[#0f172a]"
+            />
+          </div>
+          
+          <button type="submit" disabled={authLoading} className="w-full bg-[#0f172a] text-white font-bold py-4 rounded-xl hover:bg-[#1e293b] transition flex items-center justify-center shadow-md">
+            {authLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "تسجيل الدخول"}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  // ================= واجهة الإدارة الرئيسية =================
+
   return (
     <div className="font-sans bg-[#fcfaf6] text-[#0f172a] antialiased flex min-h-screen" dir="rtl">
       
-      {/* 1. القائمة الجانبية (Sidebar) */}
+      {/* القائمة الجانبية */}
       <nav className={`fixed inset-y-0 right-0 z-40 w-64 bg-[#0f172a] shadow-2xl flex flex-col transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="absolute top-0 right-0 w-full h-40 bg-gradient-to-b from-[#c29b57]/20 to-transparent pointer-events-none"></div>
 
@@ -190,8 +249,11 @@ export default function AdminDashboard() {
           </li>
         </ul>
 
-        <div className="p-4 border-t border-white/10 text-center">
-          <p className="text-[10px] text-slate-500 font-medium">نظام إدارة ميثاق V1.0</p>
+        <div className="p-4 border-t border-white/10 flex flex-col gap-3">
+          <button onClick={handleLogout} className="text-rose-400 hover:text-rose-300 text-xs font-bold transition flex items-center justify-center gap-2 bg-white/5 py-2 rounded-lg">
+            تسجيل الخروج
+          </button>
+          <p className="text-[10px] text-slate-500 font-medium text-center">نظام إدارة ميثاق V1.0</p>
         </div>
       </nav>
 
@@ -200,7 +262,7 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 bg-[#0f172a]/60 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)}></div>
       )}
 
-      {/* 2. منطقة المحتوى الرئيسية */}
+      {/* منطقة المحتوى الرئيسية */}
       <main className="flex-1 flex flex-col md:mr-64 relative z-10 w-full min-h-screen">
         
         {/* الشريط العلوي */}
@@ -451,14 +513,11 @@ export default function AdminDashboard() {
         </div>
       </main>
 
-      {/* ========================================================= */}
-      {/* 3. النافذة المنبثقة للتفاصيل الكاملة (View Details Modal) */}
-      {/* ========================================================= */}
+      {/* النافذة المنبثقة للتفاصيل الكاملة */}
       {isModalOpen && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8 duration-300">
             
-            {/* هيدر النافذة المنبثقة */}
             <div className="bg-[#0f172a] p-5 flex justify-between items-center relative">
               <div className="flex items-center gap-3 text-white">
                 <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[#c29b57]">
@@ -477,10 +536,8 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            {/* محتوى بيانات المستخدم السكرول */}
             <div className="p-6 overflow-y-auto space-y-5 flex-1 hide-scrollbar">
               
-              {/* قسم الهوية الشخصية السريع */}
               <div className="flex items-center gap-4 bg-[#fcfaf6] border border-[#ebd9b4]/40 p-4 rounded-2xl">
                 <div className="w-14 h-14 bg-white border border-[#ebd9b4] rounded-full overflow-hidden shrink-0">
                   <PlaceholderAvatar gender={selectedUser.type} className="w-full h-full" />
@@ -495,7 +552,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* شبكة البيانات التفصيلية القادمة من قاعدة البيانات */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                   <span className="block text-[10px] font-bold text-slate-400 mb-1">المدينة والمنطقة</span>
@@ -526,7 +582,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* قسم النبذة التعريفية (Bio) */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-500 block">النبذة التعريفية والمواصفات:</span>
                 <div className="bg-[#fcfaf6] p-4 rounded-xl border border-slate-100">
@@ -537,7 +592,6 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* أزرار اتخاذ القرار المباشر من داخل النافذة المنبثقة */}
             <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-2">
               {actionLoading === selectedUser.$id ? (
                 <div className="w-full flex justify-center py-2"><Loader2 className="w-6 h-6 text-[#c29b57] animate-spin" /></div>

@@ -13,6 +13,7 @@ const tajawal = Tajawal({
 export const metadata: Metadata = {
   title: "ميثاق | منصة التوافق والزواج الجاد",
   description: "منصة موثوقة للتوافق والزواج الجاد داخل الخليج، بإشراف ومتابعة بشرية للحفاظ على الجدية والخصوصية.",
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {

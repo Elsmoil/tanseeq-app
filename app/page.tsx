@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import RecentRequestsSlider from "@/components/RecentRequestsSlider";
 import TopHeader from "@/components/TopHeader";
+import InstallAppModal from "@/components/InstallAppModal";
+
 const LaurelSvg = ({ className, flipped }: { className?: string, flipped?: boolean }) => (
   <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ transform: flipped ? 'scaleX(-1)' : 'none' }}>
     <path d="M10 30 C 10 20, 15 10, 30 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -222,16 +224,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 gap-3 md:gap-4">
           {/* زر تثبيت التطبيق - تم تحويله إلى Button بدلاً من الرابط */}
-          <button onClick={handleInstallClick} className="w-full bg-[#c29b57] rounded-xl md:rounded-[1.5rem] py-3.5 px-3 flex items-center justify-center gap-2 md:gap-4 shadow-sm hover:bg-[#b08945] transition">
-             <div className="text-right">
-               <h3 className="font-bold text-[#0f172a] text-[11px] md:text-base mb-1 leading-none">تثبيت التطبيق</h3>
-               <p className="text-[#0f172a] text-[8px] md:text-[11px] opacity-80">ثبت ميثاق على جهازك</p>
-             </div>
-             <div className="shrink-0 text-[#0f172a]">
-               <Download size={20} className="md:w-6 md:h-6" strokeWidth={2} />
-             </div>
-          </button>
-          
+          <InstallAppModal />          
           <a href="https://wa.me/966527585083" target="_blank" rel="noopener noreferrer" className="bg-[#0f172a] rounded-xl md:rounded-[1.5rem] py-3.5 px-3 flex items-center justify-center gap-2 md:gap-4 shadow-sm hover:bg-[#16213b] transition">
              <div className="shrink-0 border-[1.5px] border-[#c29b57] rounded-full p-1.5 flex items-center justify-center text-[#c29b57]">
                <MessageCircle size={16} className="md:w-5 md:h-5" strokeWidth={2} />

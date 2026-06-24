@@ -19,7 +19,7 @@ const verifyAdminSession = async () => {
 // 1. جلب جميع الطلبات
 export async function GET() {
   try {
-    // 🛡️ التحقق الأمني قبل فعل أي شيء
+    //  التحقق الأمني قبل فعل أي شيء
     const isAuthorized = await verifyAdminSession();
     if (!isAuthorized) {
       return NextResponse.json({ success: false, error: 'غير مصرح لك بالدخول (Unauthorized)' }, { status: 401 });
@@ -40,24 +40,40 @@ export async function GET() {
 // 2. تحديث حالة الطلب
 export async function PATCH(req: Request) {
   try {
-    // 🛡️ التحقق الأمني قبل التعديل
     const isAuthorized = await verifyAdminSession();
     if (!isAuthorized) {
       return NextResponse.json({ success: false, error: 'غير مصرح لك بالدخول (Unauthorized)' }, { status: 401 });
     }
 
-    const { documentId, newStatus } = await req.json();
-    if (!documentId || !newStatus) return NextResponse.json({ error: 'Missing data' }, { status: 400 });
+    const body = await req.json();
+    const { documentId, updates, newStatus } = body;
+
+    //  ذكاء برمجي: دعم التوافقية! إذا أرسلت الواجهة 'newStatus' نستخدمه، وإذا أرسلت 'updates' نستخدمها
+    const dataToUpdate = updates || (newStatus ? { status: newStatus } : null);
+
+    if (!documentId || !dataToUpdate) {
+      return NextResponse.json({ error: 'بيانات التحديث مفقودة' }, { status: 400 });
+    }
+
+    // تنظيف البيانات (إزالة حقول Appwrite المحمية حتى لا يحدث خطأ إذا أرسلت الواجهة الكائن بالكامل)
+    delete dataToUpdate.$id;
+    delete dataToUpdate.$createdAt;
+    delete dataToUpdate.$updatedAt;
+    delete dataToUpdate.$permissions;
+    delete dataToUpdate.$databaseId;
+    delete dataToUpdate.$collectionId;
 
     const databases = getSecureClient();
     const response = await databases.updateDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DB_ID as string,
       process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID as string,
       documentId,
-      { status: newStatus }
+      dataToUpdate
     );
+    
     return NextResponse.json({ success: true, document: response });
   } catch (error: any) {
+    console.error("API Patch Error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

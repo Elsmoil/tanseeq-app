@@ -16,8 +16,24 @@ const RingIcon = ({ size = 24, strokeWidth = 2, className = "" }) => (
 export default function BottomNav() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const [hasProfile, setHasProfile] = useState(false);
   //  التحقق من حالة الدخول عبر الـ Cookie المرئي
+  //
+  //
+  useEffect(() => {
+    const checkProfileStatus = () => {
+      const isSubmitted = localStorage.getItem("mithaq_submitted") === "true";
+      setHasProfile(isSubmitted);
+    };
+
+    checkProfileStatus(); // الفحص المبدئي
+    window.addEventListener("profileCreated", checkProfileStatus); // الاستماع للحدث الفوري
+
+    return () => {
+      window.removeEventListener("profileCreated", checkProfileStatus);
+    };
+  }, []);
+  //
   useEffect(() => {
     const checkAuth = () => {
       const loggedIn = document.cookie.includes("mithaq_auth_status=true");
@@ -26,13 +42,15 @@ export default function BottomNav() {
     checkAuth();
   }, [pathname]);
 
+  const showProfile = isLoggedIn || hasProfile;
+
   const navItems = [
     { name: "الرئيسية", href: "/", icon: Home, isSpecial: false },
     { name: "استكشف", href: "/explore", icon: Search, isSpecial: false },
     { 
       //  تغيير الاسم والرابط ديناميكياً بناءً على حالة تسجيل الدخول
-      name: isLoggedIn ? "حسابي" : "إنشاء ملفي", 
-      href: isLoggedIn ? "/profile" : "/register", 
+      name: showProfile ? "حسابي" : "إنشاء ملفي",
+      href: showProfile ? "/profile" : "/register", 
       icon: User, 
       isSpecial: true 
     },
@@ -47,7 +65,7 @@ export default function BottomNav() {
         
         {navItems.map((item) => {
           // لتفعيل اللون الذهبي إذا كان في صفحة الحساب أيضاً
-          const isActive = pathname === item.href || (isLoggedIn && item.isSpecial && pathname === '/profile');
+          const isActive = pathname === item.href || (showProfile && item.isSpecial && pathname === '/profile');
           const Icon = item.icon;
 
           // 1. تصميم الدائرة الذهبية الطافية (إنشاء ملفي / حسابي)

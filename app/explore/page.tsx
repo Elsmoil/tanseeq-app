@@ -6,6 +6,7 @@ import { Search, MapPin, Filter, ChevronDown, Loader2, AlertCircle, User, Bell, 
 import { databases } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import TopHeader from "@/components/TopHeader";
+import { useSearchParams } from 'next/navigation';
 const RingIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M8.5 7.5L12 3l3.5 4.5h-7z" />
@@ -13,15 +14,25 @@ const RingIcon = ({ size = 24, className = "" }) => (
   </svg>
 );
 
+const saudiCities = [
+  "الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام", 
+  "الخبر", "الظهران", "الأحساء", "الجبيل", "الطائف", 
+  "تبوك", "بريدة", "عنيزة", "أبها", "خميس مشيط", 
+  "جازان", "نجران", "حائل", "عرعر", "سكاكا", "الباحة", "الخفجي", "ينبع"
+];
+
 export default function ExplorePage() {
-  const [activeTab, setActiveTab] = useState<"women" | "men">("women");
+  const searchParams = useSearchParams();
+  const genderQuery = searchParams.get('gender');
+  const [activeTab, setActiveTab] = useState(genderQuery === 'male' ? 'men' : 'women');
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCity, setFilterCity] = useState("");
-  const [filterAge, setFilterAge] = useState("");
+  const [minAge, setMinAge] = useState("");
+  const [maxAge, setMaxAge] = useState("");
   const [filterSocialStatus, setFilterSocialStatus] = useState("");
   const [filterMarriageType, setFilterMarriageType] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -29,6 +40,14 @@ export default function ExplorePage() {
   const [visibleCount, setVisibleCount] = useState(10);
   const observerTarget = useRef(null);
 
+
+  useEffect(() => {
+    if (genderQuery === 'male') {
+      setActiveTab('men');
+    } else if (genderQuery === 'female') {
+      setActiveTab('women');
+    }
+  }, [genderQuery]);
   useEffect(() => {
     const fetchRequests = async () => {
       setLoading(true);
@@ -53,22 +72,39 @@ export default function ExplorePage() {
     };
     fetchRequests();
   }, []);
-  const filteredRequests = requests.filter(req => {
-    const matchesTab = activeTab === "men" ? (req.type === "men" || req.type === "رجال" || req.type === "رجل" || req.type === "ذكر") : (req.type === "women" || req.type === "نساء" || req.type === "أنثى" || req.type === "انثى");
+ const filteredRequests = requests.filter(req => {
+    // 1. فلتر الجنس (تبويب الرجال أو النساء)
+    const matchesTab = activeTab === "men" 
+      ? (req.type === "men" || req.type === "رجال" || req.type === "رجل" || req.type === "ذكر") 
+      : (req.type === "women" || req.type === "نساء" || req.type === "أنثى" || req.type === "انثى");
+    
+    // 2. فلتر البحث النصي
     const matchesSearch = !searchQuery || req.request_id?.toString().includes(searchQuery) || req.city?.includes(searchQuery) || (req.bio && req.bio.includes(searchQuery));
+    
+    // 3. فلتر المدينة
     const matchesCity = !filterCity || req.city === filterCity || req.region === filterCity;
-    let matchesAge = true;
-    if (filterAge === "20-30") matchesAge = req.age >= 20 && req.age <= 30;
-    else if (filterAge === "31-40") matchesAge = req.age >= 31 && req.age <= 40;
-    else if (filterAge === "41-50") matchesAge = req.age >= 41 && req.age <= 50;
-    else if (filterAge === "+50") matchesAge = req.age > 50;
-    const matchesSocialStatus = !filterSocialStatus || req.social_status === filterSocialStatus;
-    const matchesMarriageType = !filterMarriageType || req.marriage_type === filterMarriageType;
+    
+    // 🔥 4. فلتر العمر المرن (من - إلى) [التعديل الجديد]
+    const matchesMinAge = !minAge || req.age >= parseInt(minAge);
+    const matchesMaxAge = !maxAge || req.age <= parseInt(maxAge);
+    
+    // 🔥 5. فلتر الحالة الاجتماعية الذكي [التعديل الجديد]
+    // يقبل التطابق التام، أو التطابق مع أصل الكلمة (أعزب/عزباء)
+    const matchesSocialStatus = !filterSocialStatus || 
+      req.social_status === filterSocialStatus || 
+      (req.social_status && req.social_status.includes(filterSocialStatus.replace('ة', '').replace('اء', '')));
+      
+    // 6. فلتر نوع الزواج
+const matchesMarriageType = !filterMarriageType || 
+      req.marriage_type === filterMarriageType || 
+      req.marriage_type === "أقبل الاثنين" || 
+      filterMarriageType === "أقبل الاثنين";
 
-    return matchesTab && matchesSearch && matchesCity && matchesAge && matchesSocialStatus && matchesMarriageType;
+    // إرجاع النتيجة التي تطابق جميع الشروط
+    return matchesTab && matchesSearch && matchesCity && matchesMinAge && matchesMaxAge && matchesSocialStatus && matchesMarriageType;
   });
 
-  useEffect(() => { setVisibleCount(10); }, [activeTab, searchQuery, filterCity, filterAge, filterSocialStatus, filterMarriageType]);
+  useEffect(() => { setVisibleCount(10); }, [activeTab, searchQuery, filterCity, minAge, maxAge, filterSocialStatus, filterMarriageType]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -78,7 +114,7 @@ export default function ExplorePage() {
     return () => { if (observerTarget.current) observer.unobserve(observerTarget.current); };
   }, [observerTarget]);
 
-  const hasActiveFilters = filterCity || filterAge || filterSocialStatus || filterMarriageType;
+  const hasActiveFilters = filterCity || minAge || maxAge || filterSocialStatus || filterMarriageType;
   const visibleRequests = filteredRequests.slice(0, visibleCount);
 
   return (
@@ -114,10 +150,66 @@ export default function ExplorePage() {
           </div>
 
           <div className={`grid grid-cols-2 md:grid-cols-4 gap-3 overflow-hidden transition-all duration-300 ease-in-out ${showFilters ? 'max-h-40 opacity-100 mt-3 pt-3 border-t border-slate-100' : 'max-h-0 opacity-0 m-0 p-0 border-none'}`}>
-            <select value={filterCity} onChange={(e) => setFilterCity(e.target.value)} className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#c29b57] text-[#0f172a] font-bold shadow-sm"><option value="">المدينة</option><option value="الرياض">الرياض</option><option value="جدة">جدة</option><option value="الدمام">الدمام</option></select>
-            <select value={filterAge} onChange={(e) => setFilterAge(e.target.value)} className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#c29b57] text-[#0f172a] font-bold shadow-sm"><option value="">العمر</option><option value="20-30">20 - 30 سنة</option><option value="31-40">31 - 40 سنة</option></select>
-            <select value={filterSocialStatus} onChange={(e) => setFilterSocialStatus(e.target.value)} className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#c29b57] text-[#0f172a] font-bold shadow-sm"><option value="">الحالة</option><option value="أعزب">أعزب/عزباء</option><option value="مطلق">مطلق/مطلقة</option></select>
-            <select value={filterMarriageType} onChange={(e) => setFilterMarriageType(e.target.value)} className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#c29b57] text-[#0f172a] font-bold shadow-sm"><option value="">نوع الزواج</option><option value="معلن">معلن</option><option value="مسيار">مسيار</option></select>
+<select 
+  value={filterCity} 
+  onChange={(e) => setFilterCity(e.target.value)} 
+  className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#c29b57] text-[#0f172a] font-bold shadow-sm"
+>
+  <option value="">جميع المدن</option>
+  {saudiCities.map((city, idx) => (
+    <option key={idx} value={city}>{city}</option>
+  ))}
+</select>            
+            {/* فلتر العمر من وإلى */}
+            <div className="flex gap-1 items-center bg-white border border-slate-200 rounded-xl px-2 shadow-sm h-[42px]">
+              <input 
+                type="number" 
+                min="18"
+                max="90"
+                placeholder="من عمر" 
+                className="w-full text-xs outline-none text-[#0f172a] font-bold text-center bg-transparent" 
+                value={minAge} 
+                onChange={(e) => setMinAge(e.target.value)} 
+                onKeyDown={(e) => { if (e.key === '-' || e.key === 'e' || e.key === '.') e.preventDefault(); }}
+              />
+              <span className="text-slate-300 text-xs">-</span>
+              <input 
+                type="number" 
+                min="18"
+                max="90"
+                placeholder="إلى" 
+                className="w-full text-xs outline-none text-[#0f172a] font-bold text-center bg-transparent" 
+                value={maxAge} 
+                onChange={(e) => setMaxAge(e.target.value)} 
+                onKeyDown={(e) => { if (e.key === '-' || e.key === 'e' || e.key === '.') e.preventDefault(); }}
+              />
+            </div>
+            {/* فلتر الحالة الاجتماعية الديناميكي */}
+            <select value={filterSocialStatus} onChange={(e) => setFilterSocialStatus(e.target.value)} className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#c29b57] text-[#0f172a] font-bold shadow-sm">
+              <option value="">الحالة</option>
+              {activeTab === 'women' ? (
+                <>
+                  <option value="عزباء">عزباء</option>
+                  <option value="مطلقة">مطلقة</option>
+                  <option value="أرملة">أرملة</option>
+                </>
+              ) : (
+                <>
+                  <option value="أعزب">أعزب</option>
+                  <option value="مطلق">مطلق</option>
+                  <option value="أرمل">أرمل</option>
+                  <option value="متزوج">متزوج</option>
+                </>
+              )}
+            </select>
+
+            {/* فلتر نوع الزواج */}
+            <select value={filterMarriageType} onChange={(e) => setFilterMarriageType(e.target.value)} className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#c29b57] text-[#0f172a] font-bold shadow-sm">
+              <option value="">نوع الزواج</option>
+              <option value="معلن">معلن</option>
+              <option value="مسيار">مسيار</option>
+              <option value="أقبل الاثنين">أقبل الاثنين</option>
+            </select>
           </div>
         </div>
 

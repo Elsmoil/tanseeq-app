@@ -94,11 +94,15 @@ function RegisterContent() {
       if (cleanPhone.startsWith('0')) cleanPhone = cleanPhone.substring(1); 
       const internationalPhone = `+966${cleanPhone}`;
 
-      if (!(window as any).recaptchaVerifier) {
-        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-        });
+      if ((window as any).recaptchaVerifier) {
+        try {
+          (window as any).recaptchaVerifier.clear();
+        } catch (e) {}
       }
+
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+      });
       const appVerifier = (window as any).recaptchaVerifier;
 
       const confirmation = await signInWithPhoneNumber(auth, internationalPhone, appVerifier);
@@ -107,10 +111,6 @@ function RegisterContent() {
 
     } catch (error: any) {
       console.error("Firebase SMS Error:", error);
-      if ((window as any).recaptchaVerifier) {
-         (window as any).recaptchaVerifier.clear();
-         (window as any).recaptchaVerifier = null;
-      }
       alert("حدث خطأ أثناء إرسال الرسالة. يرجى التأكد من الرقم أو المحاولة لاحقاً.");
     } finally {
       setLoading(false);
@@ -166,6 +166,8 @@ function RegisterContent() {
       
       localStorage.setItem("mithaq_submitted", "true");
       localStorage.setItem("mithaq_req_id", generatedRequestId);
+
+      window.dispatchEvent(new Event("profileCreated"));
 
     } catch (error: any) {
       console.error("Error verifying OTP or submitting:", error);
@@ -319,14 +321,31 @@ function RegisterContent() {
                       </div>
                     )}
 
-                    <div>
-                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">المستوى التعليمي</label>
-                      <input type="text" name="education_level" value={formData.education_level} onChange={handleChange} required placeholder="مثال: بكالوريوس" className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]" />
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-bold text-[#0f172a]">الوظيفة</label>
-                      <input type="text" name="job" value={formData.job} onChange={handleChange} required placeholder="مثال: معلم، مهندس، لا أعمل..." className="w-full border border-[#e2e8f0] rounded-xl p-4 bg-[#f8fafc] outline-none focus:border-[#c29b57]" />
-                    </div>
+                    {/* 1. التعليم */}
+      <div className="mb-4">
+        <label className="block text-sm font-bold text-[#0f172a] mb-2">المستوى التعليمي</label>
+        <select name="education_level" value={formData.education_level} onChange={handleChange} className="w-full p-3 border border-slate-200 rounded-xl bg-white focus:border-[#c29b57] outline-none">
+          <option value="">اختر المستوى التعليمي...</option>
+          {["ابتدائي", "متوسط", "ثانوي", "دبلوم", "بكالوريوس", "ماجستير", "دكتوراه", "أخرى", "أفضل عدم الإفصاح"].map(lvl => (
+            <option key={lvl} value={lvl}>{lvl}</option>
+          ))}
+        </select>
+      </div>                    <div className="mb-4">
+        <label className="block text-sm font-bold text-[#0f172a] mb-2">الوظيفة</label>
+        <select name="job" value={formData.job === "أخرى" ? "أخرى" : formData.job} onChange={handleChange} className="w-full p-3 border border-slate-200 rounded-xl bg-white focus:border-[#c29b57] outline-none">
+          <option value="">اختر الوظيفة...</option>
+          {formType === 'women' ? (
+            ["طالبة", "موظفة حكومية", "موظفة قطاع خاص", "عسكرية", "سيدة أعمال", "عمل حر", "متقاعدة", "باحثة عن عمل", "ربة منزل", "أخرى", "أفضل عدم الإفصاح"].map(j => <option key={j} value={j}>{j}</option>)
+          ) : (
+            ["طالب", "موظف حكومي", "موظف قطاع خاص", "عسكري", "رجل أعمال", "عمل حر", "متقاعد", "باحث عن عمل", "أخرى", "أفضل عدم الإفصاح"].map(j => <option key={j} value={j}>{j}</option>)
+          )}
+        </select>
+        
+        {/* 3. إظهار الإدخال النصي إذا اختار أخرى */}
+        {formData.job === "أخرى" || (formData.job && !["طالب", "موظف حكومي", "موظف قطاع خاص", "عسكري", "رجل أعمال", "عمل حر", "متقاعد", "باحث عن عمل", "أخرى", "أفضل عدم الإفصاح", "طالبة", "موظفة حكومية", "موظفة قطاع خاص", "عسكرية", "سيدة أعمال", "متقاعدة", "باحثة عن عمل", "ربة منزل"].includes(formData.job)) ? (
+          <input type="text" name="job" placeholder="يرجى كتابة المسمى الوظيفي" value={formData.job !== "أخرى" ? formData.job : ""} onChange={handleChange} className="w-full p-3 mt-3 border border-slate-200 rounded-xl bg-white focus:border-[#c29b57] outline-none" />
+        ) : null}
+      </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -484,6 +503,8 @@ function RegisterContent() {
           </div>
         </div>
       )}
+      <div id="recaptcha-container" className="mt-4"></div>
+
     </main>
   );
 }

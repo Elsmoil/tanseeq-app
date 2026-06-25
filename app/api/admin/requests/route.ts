@@ -77,3 +77,43 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    const isAuthorized = await verifyAdminSession();
+    if (!isAuthorized) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
+    const data = await req.json();
+    const databases = getSecureClient();
+    const response = await databases.createDocument(
+      process.env.NEXT_PUBLIC_APPWRITE_DB_ID as string,
+      process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID as string,
+      ID.unique(),
+      data
+    );
+    return NextResponse.json({ success: true, document: response });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const isAuthorized = await verifyAdminSession();
+    if (!isAuthorized) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const documentId = searchParams.get('id');
+    if (!documentId) return NextResponse.json({ error: 'معرف الملف مفقود' }, { status: 400 });
+
+    const databases = getSecureClient();
+    await databases.deleteDocument(
+      process.env.NEXT_PUBLIC_APPWRITE_DB_ID as string,
+      process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID as string,
+      documentId
+    );
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}

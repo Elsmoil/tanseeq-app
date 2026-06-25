@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Menu, Heart, Search, CheckCircle2, AlertCircle, LayoutDashboard, Users, User, Settings, X, ShieldCheck, Clock, XCircle, Bell, ChevronLeft, Save, Eye, MapPin, Edit2, Briefcase, Plus } from "lucide-react";
+import { Loader2, Menu, Heart, Search, CheckCircle2, AlertCircle, LayoutDashboard, Users, User, Settings, X, ShieldCheck, Clock, XCircle, Bell, ChevronLeft, Save, Eye, MapPin, Edit2, Briefcase, Plus, Trash2, MessageCircle } from "lucide-react";
 import PlaceholderAvatar from "@/components/PlaceholderAvatar";
 
 const RingIcon = ({ size = 24, className = "" }) => (
@@ -10,6 +10,11 @@ const RingIcon = ({ size = 24, className = "" }) => (
     <circle cx="12" cy="15" r="5.5" />
   </svg>
 );
+
+const initialFormState = {
+  type: "men", first_name: "", age: "", nationality: "", whatsapp_number: "", country: "السعودية", region: "", social_status: "", has_children: "", children_count: "", education_level: "",
+  job: "", height: "", weight: "", skin_color: "", origin: "", tribe_name: "", marriage_type: "", want_children: "", bio: "", requirements: "", notes: "", status: "منشور"
+};
 
 export default function AdminDashboard() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -26,8 +31,9 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // 💡 حالات التعديل الجديدة
+  // حالات التعديل والإضافة
   const [isEditing, setIsEditing] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [editFormData, setEditFormData] = useState<any>({});
 
   useEffect(() => {
@@ -80,29 +86,61 @@ export default function AdminDashboard() {
     }
   };
 
-  // 💡 دالة حفظ التعديلات الجديدة
   const saveEdits = async () => {
-    if (!selectedUser) return;
     setActionLoading('saving_edits');
     try {
-      const res = await fetch('/api/admin/requests', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId: selectedUser.$id, updates: editFormData })
-      });
+      const payload = { 
+        ...editFormData, 
+        age: parseInt(editFormData.age) || null, 
+        height: parseInt(editFormData.height) || null, 
+        weight: parseInt(editFormData.weight) || null 
+      };
+      
+      let url = '/api/admin/requests';
+      let method = isAdding ? 'POST' : 'PATCH';
+      let bodyData = isAdding 
+        ? { ...payload, request_id: `MTQ-${Math.floor(Math.random() * 900000) + 100000}`, source: 'إضافة يدوية' } 
+        : { documentId: selectedUser.$id, updates: payload };
+
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bodyData) });
       const data = await res.json();
 
       if (data.success) {
-        // تحديث البيانات محلياً لتعكس التغيير فوراً
-        setRequests(requests.map(req => req.$id === selectedUser.$id ? { ...req, ...editFormData } : req));
-        setSelectedUser({ ...selectedUser, ...editFormData });
+        if (isAdding) {
+          setRequests([data.document, ...requests]);
+        } else {
+          setRequests(requests.map(req => req.$id === selectedUser.$id ? { ...req, ...payload } : req));
+          setSelectedUser({ ...selectedUser, ...payload });
+        }
         setIsEditing(false);
+        setIsAdding(false);
+        setIsModalOpen(false);
       } else {
         throw new Error(data.error);
       }
     } catch (error) {
       console.error("Error saving edits:", error);
       alert("حدث خطأ أثناء حفظ التعديلات.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا الملف نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+    setActionLoading('deleting');
+    try {
+      const res = await fetch(`/api/admin/requests?id=${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setRequests(requests.filter(req => req.$id !== id));
+        setIsModalOpen(false);
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error("Error deleting:", error);
+      alert("حدث خطأ أثناء החذ.");
     } finally {
       setActionLoading(null);
     }
@@ -139,8 +177,17 @@ export default function AdminDashboard() {
 
   const handleOpenDetails = (user: any) => {
     setSelectedUser(user);
-    setEditFormData({ ...user }); // تجهيز البيانات للتعديل المحتمل
-    setIsEditing(false); // التأكد من أن وضع التعديل مغلق عند فتح نافذة جديدة
+    setEditFormData({ ...user });
+    setIsEditing(false);
+    setIsAdding(false);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenAdd = () => {
+    setSelectedUser(null);
+    setEditFormData(initialFormState);
+    setIsAdding(true);
+    setIsEditing(true);
     setIsModalOpen(true);
   };
 
@@ -234,7 +281,6 @@ export default function AdminDashboard() {
                       </div>
                       <h3 className="text-3xl md:text-4xl font-black text-white relative z-10 mt-2">{requests.length}</h3>
                     </div>
-                    {/* ... (باقي البطاقات الإحصائية كما هي في الكود السابق) ... */}
                     <div className="bg-white rounded-[1.5rem] p-5 shadow-sm border border-emerald-100 flex flex-col justify-between group hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-slate-500 text-[11px] md:text-sm font-bold leading-tight">الطلبات النشطة</span>
@@ -264,19 +310,28 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* 💡 الجدول الاحترافي لإدارة الطلبات */}
+          {/* 💡 الجدول الاحترافي لإدارة الطلبات (تم إصلاح الموبايل هنا) */}
           {currentMenu === "users" && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-100">
-                <div className="relative w-full md:w-1/3">
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl focus:border-[#c29b57] focus:ring-1 focus:ring-[#c29b57] py-2.5 pr-11 pl-4 text-xs md:text-sm text-[#0f172a] outline-none transition-all" 
-                    placeholder="البحث برقم الملف، الاسم، أو المدينة..." 
-                    value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-100">
+                
+                {/* قسم البحث وزر الإضافة (تجاوب مثالي للموبايل) */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl focus:border-[#c29b57] focus:ring-1 focus:ring-[#c29b57] py-2.5 pr-11 pl-4 text-xs md:text-sm text-[#0f172a] outline-none transition-all" 
+                      placeholder="البحث برقم الملف، الاسم، أو المدينة..." 
+                      value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <button onClick={handleOpenAdd} className="w-full sm:w-auto bg-[#0f172a] text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#16213b] shrink-0 transition shadow-sm">
+                    <Plus size={16} /> إضافة ملف يدوي
+                  </button>
                 </div>
-                <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+
+                {/* الفلاتر */}
+                <div className="flex gap-2 overflow-x-auto hide-scrollbar w-full lg:w-auto pb-1">
                   {[{ id: 'all', label: 'الكل' }, { id: 'pending', label: 'قيد المراجعة' }, { id: 'approved', label: 'النشطة' }, { id: 'rejected', label: 'المرفوضة' }].map((tab) => (
                     <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`whitespace-nowrap px-4 py-2 rounded-xl font-bold text-xs transition-all shadow-sm ${activeTab === tab.id ? 'bg-[#0f172a] text-white border border-[#0f172a]' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                       {tab.label}
@@ -290,9 +345,10 @@ export default function AdminDashboard() {
               ) : filteredRequests.length === 0 ? (
                 <div className="text-center py-20 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm flex flex-col items-center"><Search className="w-8 h-8 text-slate-300 mb-3" /><p className="text-slate-500 font-bold">لا توجد ملفات تطابق بحثك حالياً.</p></div>
               ) : (
-                <div className="bg-white border border-slate-100 rounded-[1.5rem] shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-right">
+                <div className="bg-white border border-slate-100 rounded-[1.5rem] shadow-sm overflow-hidden w-full">
+                  {/* هنا سحر إصلاح التمدد على الجوال */}
+                  <div className="overflow-x-auto w-full">
+                    <table className="w-full text-sm text-right min-w-[800px] whitespace-nowrap">
                       <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
                         <tr>
                           <th className="px-6 py-4">رقم الملف</th>
@@ -340,7 +396,7 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* 💡 إدارة الخدمات والباقات (جديد) */}
+          {/* إدارة الخدمات والباقات */}
           {currentMenu === "services" && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
               <div className="flex justify-between items-center mb-6">
@@ -387,8 +443,7 @@ export default function AdminDashboard() {
             <div className="animate-in fade-in duration-500 max-w-3xl mx-auto">
               <div className="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 p-6 md:p-8">
                 <h3 className="text-lg font-extrabold text-[#0f172a] mb-6 border-b border-slate-100 pb-4">الإعدادات العامة للمنصة</h3>
-                {/* ... (محتوى الإعدادات كما هو في الكود القديم) ... */}
-                <p className="text-sm text-slate-500">واجهة الإعدادات تم تثبيتها كجزء من النسخة الأولية.</p>
+                <p className="text-sm text-slate-500">واجهة الإعدادات تم تثبيتها كجزء من النسخة الأولية وفي انتظار تفعيلها في المرحلة القادمة.</p>
               </div>
             </div>
           )}
@@ -397,48 +452,74 @@ export default function AdminDashboard() {
       </main>
 
       {/* 💡 النافذة المنبثقة للتفاصيل والتعديل */}
-      {isModalOpen && selectedUser && (
+      {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f172a]/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-2xl rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+          <div className="bg-white w-full max-w-3xl rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
             
             {/* الهيدر */}
-            <div className="bg-[#0f172a] p-5 flex justify-between items-center relative shrink-0">
+            <div className="bg-[#0f172a] p-4 md:p-5 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3 text-white">
                 <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[#c29b57]">
-                  {isEditing ? <Edit2 size={18} /> : <Eye size={18} />}
+                  {isAdding ? <Plus size={18} /> : isEditing ? <Edit2 size={18} /> : <Eye size={18} />}
                 </div>
                 <div>
-                  <h3 className="font-black text-sm md:text-base">{isEditing ? "تعديل بيانات الطلب" : "تفاصيل طلب الزواج"}</h3>
-                  <p className="text-[10px] text-slate-400" dir="ltr">#{selectedUser.request_id}</p>
+                  <h3 className="font-black text-sm md:text-base">{isAdding ? "إضافة ملف جديد" : isEditing ? "تعديل بيانات الطلب" : "تفاصيل طلب الزواج"}</h3>
+                  {!isAdding && <p className="text-[10px] text-slate-400" dir="ltr">#{selectedUser?.request_id}</p>}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {!isEditing && (
-                  <button onClick={() => setIsEditing(true)} className="px-3 py-1.5 bg-[#c29b57] text-[#0f172a] text-xs font-bold rounded-lg hover:bg-[#dcb466] transition flex items-center gap-1">
-                    <Edit2 size={12} /> تعديل
-                  </button>
+                {!isEditing && selectedUser && (
+                  <>
+                    <button onClick={() => setIsEditing(true)} className="px-3 py-1.5 bg-[#c29b57] text-[#0f172a] text-xs font-bold rounded-lg hover:bg-[#dcb466] transition flex items-center gap-1 hidden sm:flex">
+                      <Edit2 size={12} /> تعديل
+                    </button>
+                    <button onClick={() => handleDelete(selectedUser.$id)} className="px-3 py-1.5 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg hover:bg-rose-100 transition flex items-center gap-1 hidden sm:flex">
+                      <Trash2 size={12} /> حذف
+                    </button>
+                  </>
                 )}
                 <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 bg-white/10 text-white/70 hover:text-white rounded-full flex items-center justify-center transition"><X size={16} /></button>
               </div>
             </div>
 
+            {/* أزرار الموبايل للتعديل والحذف التي تختفي في الديسكتوب وتظهر فوق المحتوى */}
+            {!isEditing && selectedUser && (
+              <div className="flex sm:hidden gap-2 p-3 bg-slate-50 border-b border-slate-100">
+                 <button onClick={() => setIsEditing(true)} className="flex-1 py-2 bg-[#c29b57] text-[#0f172a] text-xs font-bold rounded-lg flex items-center justify-center gap-1"><Edit2 size={12} /> تعديل</button>
+                 <button onClick={() => handleDelete(selectedUser.$id)} className="flex-1 py-2 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg flex items-center justify-center gap-1"><Trash2 size={12} /> حذف</button>
+              </div>
+            )}
+
             {/* المحتوى */}
-            <div className="p-6 overflow-y-auto flex-1 hide-scrollbar">
+            <div className="p-4 md:p-6 overflow-y-auto flex-1 hide-scrollbar">
               
-              {!isEditing ? (
+              {!isEditing && selectedUser ? (
                 // --- وضع العرض (View Mode) ---
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 bg-[#fcfaf6] border border-[#ebd9b4]/40 p-4 rounded-2xl">
-                    <div className="w-14 h-14 bg-white border border-[#ebd9b4] rounded-full overflow-hidden shrink-0">
-                      <PlaceholderAvatar gender={selectedUser.type} className="w-full h-full" />
+                  <div className="flex items-center justify-between bg-[#fcfaf6] border border-[#ebd9b4]/40 p-4 rounded-2xl">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-white border border-[#ebd9b4] rounded-full overflow-hidden shrink-0">
+                        <PlaceholderAvatar gender={selectedUser.type} className="w-full h-full" />
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-lg text-[#0f172a]">{selectedUser.first_name || "مستخدم غير معروف"}</h4>
+                        <p className="text-xs font-bold text-slate-500 mt-1" dir="ltr">{selectedUser.whatsapp_number}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-extrabold text-lg text-[#0f172a]">{selectedUser.first_name || "مستخدم غير معروف"}</h4>
-                      <p className="text-xs font-bold text-slate-500 mt-1" dir="ltr">{selectedUser.whatsapp_number}</p>
-                    </div>
+                    {/* زر الواتساب */}
+                    {selectedUser.whatsapp_number && (
+                      <a 
+                        href={`https://wa.me/${selectedUser.whatsapp_number.replace(/\D/g, '')}`} 
+                        target="_blank" 
+                        className="w-10 h-10 rounded-xl bg-green-50 text-green-600 hover:bg-green-500 hover:text-white flex items-center justify-center transition" 
+                        title="مراسلة عبر واتساب"
+                      >
+                        <MessageCircle size={20} />
+                      </a>
+                    )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                       <span className="block text-[10px] font-bold text-slate-400 mb-1">العمر / الجنس</span>
                       <div className="text-xs font-bold text-[#0f172a]">{selectedUser.age} سنة • {selectedUser.type === 'women' ? 'أنثى' : 'ذكر'}</div>
@@ -479,38 +560,45 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               ) : (
-                // --- وضع التعديل (Edit Mode) ---
+                // --- وضع الإضافة أو التعديل (Edit / Add Mode) ---
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-[#0f172a] mb-1">الاسم الأول أو المستعار</label>
-                      <input type="text" name="first_name" value={editFormData.first_name || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#c29b57]" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-[#0f172a] mb-1">العمر</label>
-                      <input type="number" name="age" value={editFormData.age || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#c29b57]" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-[#0f172a] mb-1">المدينة / المنطقة</label>
-                      <input type="text" name="region" value={editFormData.region || editFormData.city || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#c29b57]" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-[#0f172a] mb-1">الحالة الاجتماعية</label>
-                      <input type="text" name="social_status" value={editFormData.social_status || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#c29b57]" />
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div><label className="block text-xs font-bold mb-1">نوع الملف (الجنس)</label><select name="type" value={editFormData.type || "men"} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]"><option value="men">رجل</option><option value="women">امرأة</option></select></div>
+                    <div><label className="block text-xs font-bold mb-1">الاسم أو المستعار</label><input type="text" name="first_name" value={editFormData.first_name || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">رقم الواتساب</label><input type="text" name="whatsapp_number" value={editFormData.whatsapp_number || ""} onChange={handleEditChange} dir="ltr" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    
+                    <div><label className="block text-xs font-bold mb-1">العمر</label><input type="number" name="age" value={editFormData.age || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">الجنسية</label><input type="text" name="nationality" value={editFormData.nationality || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">الدولة</label><input type="text" name="country" value={editFormData.country || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    
+                    <div><label className="block text-xs font-bold mb-1">المدينة / المنطقة</label><input type="text" name="region" value={editFormData.region || editFormData.city || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">الحالة الاجتماعية</label><input type="text" name="social_status" value={editFormData.social_status || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">الأبناء</label><select name="has_children" value={editFormData.has_children || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]"><option value="لا يوجد">لا يوجد</option><option value="يوجد أبناء">يوجد أبناء</option></select></div>
+                    
+                    <div><label className="block text-xs font-bold mb-1">عدد الأبناء</label><input type="number" name="children_count" value={editFormData.children_count || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">التعليم</label><input type="text" name="education_level" value={editFormData.education_level || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">المهنة</label><input type="text" name="job" value={editFormData.job || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+
+                    <div><label className="block text-xs font-bold mb-1">الطول</label><input type="number" name="height" value={editFormData.height || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">الوزن</label><input type="number" name="weight" value={editFormData.weight || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">لون البشرة</label><input type="text" name="skin_color" value={editFormData.skin_color || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+
+                    <div><label className="block text-xs font-bold mb-1">القبيلة / الأصل</label><select name="origin" value={editFormData.origin || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]"><option value="قبيلي">قبيلي</option><option value="غير قبيلي">غير قبيلي</option><option value="أفضل عدم الإفصاح">أفضل عدم الإفصاح</option></select></div>
+                    <div><label className="block text-xs font-bold mb-1">اسم القبيلة (إن وجد)</label><input type="text" name="tribe_name" value={editFormData.tribe_name || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]" /></div>
+                    <div><label className="block text-xs font-bold mb-1">الرغبة بالإنجاب</label><select name="want_children" value={editFormData.want_children || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]"><option value="نعم">نعم</option><option value="لا">لا</option><option value="حسب الاتفاق">حسب الاتفاق</option></select></div>
+                    
+                    <div><label className="block text-xs font-bold mb-1">نوع الزواج المطلوب</label><select name="marriage_type" value={editFormData.marriage_type || ""} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]"><option value="معلن">معلن</option><option value="مسيار">مسيار</option><option value="أقبل الاثنين">أقبل الاثنين</option></select></div>
+                    <div><label className="block text-xs font-bold mb-1">حالة الطلب</label><select name="status" value={editFormData.status || "قيد المراجعة"} onChange={handleEditChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57]"><option value="منشور">منشور</option><option value="قيد المراجعة">قيد المراجعة</option><option value="مرفوض">مرفوض</option></select></div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#0f172a] mb-1">النبذة التعريفية عنك</label>
-                    <textarea name="bio" value={editFormData.bio || ""} onChange={handleEditChange} rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#c29b57] resize-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#0f172a] mb-1">المواصفات المطلوبة</label>
-                    <textarea name="requirements" value={editFormData.requirements || ""} onChange={handleEditChange} rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#c29b57] resize-none" />
-                  </div>
-                  <div className="pt-2 flex justify-end gap-2">
-                    <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200 transition">إلغاء</button>
-                    <button onClick={saveEdits} disabled={actionLoading === 'saving_edits'} className="px-4 py-2 bg-[#0f172a] text-white text-xs font-bold rounded-lg hover:bg-[#16213b] transition flex items-center gap-2">
-                      {actionLoading === 'saving_edits' ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save size={14} /> حفظ التعديلات</>}
+
+                  <div><label className="block text-xs font-bold mb-1">النبذة التعريفية</label><textarea name="bio" value={editFormData.bio || ""} onChange={handleEditChange} rows={2} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57] resize-none" /></div>
+                  <div><label className="block text-xs font-bold mb-1">المواصفات المطلوبة</label><textarea name="requirements" value={editFormData.requirements || ""} onChange={handleEditChange} rows={2} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57] resize-none" /></div>
+                  <div><label className="block text-xs font-bold mb-1">تفضيلات إضافية (ملاحظات)</label><textarea name="notes" value={editFormData.notes || ""} onChange={handleEditChange} rows={2} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-[#c29b57] resize-none" /></div>
+
+                  <div className="pt-4 flex justify-end gap-2 border-t border-slate-200">
+                    <button onClick={() => {setIsEditing(false); setIsAdding(false); setIsModalOpen(false);}} className="px-6 py-2.5 bg-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-300 transition">إلغاء</button>
+                    <button onClick={saveEdits} disabled={actionLoading === 'saving_edits'} className="px-6 py-2.5 bg-[#0f172a] text-white text-xs font-bold rounded-xl hover:bg-[#16213b] transition flex items-center gap-2">
+                      {actionLoading === 'saving_edits' ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save size={14} /> حفظ البيانات</>}
                     </button>
                   </div>
                 </div>
@@ -518,7 +606,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* الفوتر (أزرار القبول والرفض تظهر فقط في وضع العرض) */}
-            {!isEditing && (
+            {!isEditing && selectedUser && (
               <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-2 shrink-0">
                 {actionLoading === selectedUser.$id ? (
                   <div className="w-full flex justify-center py-2"><Loader2 className="w-6 h-6 text-[#c29b57] animate-spin" /></div>

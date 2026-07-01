@@ -92,8 +92,8 @@ function RegisterContent() {
     try {
       let cleanPhone = formData.whatsapp_number.replace(/[^0-9]/g, '');
       if (cleanPhone.startsWith('0')) cleanPhone = cleanPhone.substring(1); 
-      const internationalPhone = `+966${cleanPhone}`;
-
+      const isMyDevNumber = cleanPhone === "557745653"; // 👈 ضع رقمك الإماراتي هنا
+      const internationalPhone = isMyDevNumber ? `+971${cleanPhone}` : `+966${cleanPhone}`;
       if ((window as any).recaptchaVerifier) {
         try {
           (window as any).recaptchaVerifier.clear();
@@ -132,8 +132,8 @@ function RegisterContent() {
       
       let finalPhoneNumber = formData.whatsapp_number;
       if (finalPhoneNumber.startsWith('0')) finalPhoneNumber = finalPhoneNumber.substring(1); 
-      const internationalPhone = `+966${finalPhoneNumber}`;
-
+      const isMyDevNumber = finalPhoneNumber === "557745653"; // 👈 ضع رقمك الإماراتي هنا
+      const internationalPhone = isMyDevNumber ? `+971${finalPhoneNumber}` : `+966${finalPhoneNumber}`;
       const submitData = {
         request_id: generatedRequestId,
         type: formType,
